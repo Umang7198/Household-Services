@@ -1,10 +1,9 @@
 import os
 from models import User, Professional, Service, ServiceRequest  # Adjust the import path according to your project structure
-import routes
 from config import app, db
 from flask_migrate import Migrate
 from flask_cors import CORS
-
+import routes
 migrate = Migrate(app, db)
 # CORS(app)
 

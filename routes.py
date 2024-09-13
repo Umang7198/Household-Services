@@ -1,8 +1,7 @@
-from flask import Blueprint, request, jsonify
 from models import db, User
 from werkzeug.security import check_password_hash, generate_password_hash
-
-auth_routes = Blueprint('auth_routes', __name__)
+from config import app,db
+from flask import Flask, request, redirect, render_template, url_for, session,abort,flash,jsonify
 
 @app.route('/')
 def index():

@@ -5,6 +5,7 @@ import ProfessionalLogin from "./components/ProfessionalLogin.js";
 import AdminLogin from "./components/AdminLogin.js";  // Import AdminLogin
 import CustomerRegister from "./components/CustomerRegister.js";
 import ProfessionalRegister from "./components/ProfessionalRegister.js";
+
 export default new VueRouter({
     routes: [
       { path: '/', component: Home },
