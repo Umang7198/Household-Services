@@ -7,6 +7,14 @@ from flask import Flask, request, redirect, render_template, url_for, session,ab
 def index():
     return render_template('index.html')
 
+@app.route('/logout', methods=['GET'])
+def logout():
+    try:
+        session.clear()  # Clear the session
+        return jsonify({'msg': 'Logged out successfully', 'status': 'success'}), 200
+    except Exception as e:
+        return jsonify({'msg': str(e), 'status': 'error'}), 500
+
 
 
 @app.route('/login', methods=['POST'])
@@ -24,6 +32,7 @@ def login():
 
     # Check if the role matches and password is correct
     if user.role == role and user.password== password:
+        session['user_id'] = user.id  # Save user ID in the session
         return jsonify({'msg': f'{role.capitalize()} login successful', 'status': 'success'}), 200
     else:
         return jsonify({'msg': 'Invalid credentials or role', 'status': 'fail'}), 401

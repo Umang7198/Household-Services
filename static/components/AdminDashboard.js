@@ -27,6 +27,26 @@ export default {
     this.fetchServices();
   },
   methods: {
+    async logout() {
+      try {
+        const response = await fetch('/logout', {
+          method: 'GET',
+        });
+        
+        const result = await response.json();
+  
+        if (response.ok) {
+          console.log('Logged out successfully:', result);
+          this.$router.push('/login/admin');  // Redirect to the login page
+        } else {
+          console.error('Failed to logout:', result.msg);
+          this.error = result.msg || 'Failed to logout';
+        }
+      } catch (error) {
+        console.error('An error occurred while logging out:', error);
+        this.error = 'An error occurred while logging out';
+      }
+    },
     async fetchServices() {
       try {
         const response = await fetch('/services');  // Call to the Flask backend to fetch services
@@ -62,9 +82,9 @@ export default {
             time_required: this.serviceToEdit.time_required,
           }),
         });
-  
+
         const result = await response.json();
-        
+
         if (response.ok) {
           this.successMessage = result.msg;
           this.editMode = false;
@@ -78,9 +98,9 @@ export default {
     },
 
     cancelEdit() {
-    this.editMode = false;
-    this.serviceToEdit = {}; // Clear the serviceToEdit
-  },
+      this.editMode = false;
+      this.serviceToEdit = {}; // Clear the serviceToEdit
+    },
     async deleteService(serviceId) {
       if (confirm('Are you sure you want to delete this service?')) {
         try {
@@ -88,7 +108,7 @@ export default {
             method: 'DELETE',
           });
           const result = await response.json();
-  
+
           if (response.ok) {
             this.successMessage = result.msg;
             this.services = this.services.filter(service => service.id !== serviceId); // Remove the deleted service from the local state
@@ -101,18 +121,19 @@ export default {
       }
     }
   },
-    approveProfessional(id) {
-      // Handle professional approval
-      console.log(`Approving professional with id ${id}`);
-    },
-    rejectProfessional(id) {
-      // Handle professional rejection
-      console.log(`Rejecting professional with id ${id}`);
-    },
-    deleteProfessional(id) {
-      // Handle professional deletion
-      console.log(`Deleting professional with id ${id}`);
-    },
+  approveProfessional(id) {
+    // Handle professional approval
+    console.log(`Approving professional with id ${id}`);
+  },
+  rejectProfessional(id) {
+    // Handle professional rejection
+    console.log(`Rejecting professional with id ${id}`);
+  },
+  deleteProfessional(id) {
+    // Handle professional deletion
+    console.log(`Deleting professional with id ${id}`);
+  },
+
   template: `
      <div class="container mt-5">
     <h1 class="text-center mb-4">Welcome to Admin Dashboard</h1>
@@ -125,7 +146,9 @@ export default {
           <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="#">Search</a></li>
           <li class="nav-item"><a class="nav-link" href="#">Summary</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
+          <li class="nav-item">
+              <a class="nav-link" href="#" @click.prevent="logout" style="cursor: pointer;">Logout</a> 
+          </li>        
         </ul>
       </div>
     </nav>
