@@ -75,3 +75,50 @@ def add_service():
     except Exception as e:
         db.session.rollback()  # Rollback in case of any error
         return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
+
+
+@app.route('/services', methods=['GET'])
+def get_services():
+    services = Service.query.all()  # Fetch all services from the database
+    service_list = [
+        {
+            'id': service.id,
+            'name': service.name,
+            'base_price': service.base_price
+        } for service in services
+    ]
+    return jsonify(service_list), 200
+
+
+@app.route('/service/<int:service_id>', methods=['PUT'])
+def update_service(service_id):
+    service = Service.query.get(service_id)
+    if not service:
+        return jsonify({'msg': 'Service not found', 'status': 'error'}), 404
+
+    data = request.get_json()
+    service.name = data.get('name')
+    service.base_price = data.get('base_price')
+    service.description = data.get('description')
+    service.time_required = data.get('time_required')
+
+    try:
+        db.session.commit()
+        return jsonify({'msg': 'Service updated successfully', 'status': 'success'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'msg': f'Failed to update service: {str(e)}', 'status': 'error'}), 500
+
+@app.route('/service/<int:service_id>', methods=['DELETE'])
+def delete_service(service_id):
+    service = Service.query.get(service_id)
+    if not service:
+        return jsonify({'msg': 'Service not found', 'status': 'error'}), 404
+
+    try:
+        db.session.delete(service)
+        db.session.commit()
+        return jsonify({'msg': 'Service deleted successfully', 'status': 'success'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'msg': f'Failed to delete service: {str(e)}', 'status': 'error'}), 500
