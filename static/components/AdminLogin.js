@@ -48,7 +48,13 @@ export default {
                 });
 
                 if (response.ok) {
-                    window.location.href = '/';
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        // Redirect to AdminDashboard on successful login
+                        this.$router.push('/admin/dashboard');
+                    } else {
+                        this.error = data.msg;
+                    }
                 } else {
                     const data = await response.json();
                     this.error = data.msg || 'Login failed';

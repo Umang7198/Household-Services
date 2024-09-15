@@ -23,7 +23,7 @@ def login():
         return jsonify({'msg': 'User not found', 'status': 'fail'}), 401
 
     # Check if the role matches and password is correct
-    if user.role == role and check_password_hash(user.password, password):
+    if user.role == role and user.password== password:
         return jsonify({'msg': f'{role.capitalize()} login successful', 'status': 'success'}), 200
     else:
         return jsonify({'msg': 'Invalid credentials or role', 'status': 'fail'}), 401
