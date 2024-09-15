@@ -18,6 +18,9 @@ export default {
       };
     },
     methods: {
+      goToAddService() {
+        this.$router.push('/add-service');
+      },
       editService(id) {
         // Handle the edit service action
         console.log(`Editing service with id ${id}`);
@@ -80,7 +83,7 @@ export default {
               </tr>
             </tbody>
           </table>
-          <button class="btn btn-success">+ New Service</button>
+          <button @click="goToAddService" class="btn btn-success">Add New Service</button>
         </section>
   
         <!-- Professionals Section -->

@@ -1,4 +1,4 @@
-from models import db, User
+from models import db, User,Service,ServiceRequest
 from werkzeug.security import check_password_hash, generate_password_hash
 from config import app,db
 from flask import Flask, request, redirect, render_template, url_for, session,abort,flash,jsonify
@@ -48,21 +48,30 @@ def create_service_request():
 
 @app.route('/service', methods=['POST'])
 def add_service():
+    # Get data from the request
     data = request.get_json()
     name = data.get('name')
     description = data.get('description')
     base_price = data.get('base_price')
     time_required = data.get('time_required')
-    professional_id = data.get('professional_id')
 
+    # Check if required fields are provided
+    if not all([name, base_price, time_required]):
+        return jsonify({'msg': 'Missing required fields', 'status': 'fail'}), 400
+
+    # Create a new service instance
     service = Service(
         name=name,
         description=description,
         base_price=base_price,
-        time_required=time_required,
-        professional_id=professional_id
+        time_required=time_required
     )
-    db.session.add(service)
-    db.session.commit()
 
-    return jsonify({'msg': 'Service added', 'status': 'success'}), 201
+    # Add the service to the database
+    try:
+        db.session.add(service)
+        db.session.commit()
+        return jsonify({'msg': 'Service added successfully', 'status': 'success'}), 201
+    except Exception as e:
+        db.session.rollback()  # Rollback in case of any error
+        return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
