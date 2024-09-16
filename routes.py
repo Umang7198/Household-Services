@@ -131,3 +131,52 @@ def delete_service(service_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'msg': f'Failed to delete service: {str(e)}', 'status': 'error'}), 500
+
+
+from flask import Flask, request, jsonify
+from models import db, User, Service
+from werkzeug.security import generate_password_hash
+
+@app.route('/register/professional', methods=['POST'])
+def register_professional():
+    data = request.get_json()
+    
+    name = data.get('name')
+    service_id = data.get('service_id')
+    experience = data.get('experience')
+    description = data.get('description')
+    address = data.get('address')
+    pin = data.get('pin')
+    password=data.get('password')
+    email=data.get('email')
+    mobile=data.get('mobile')
+    username=data.get('username')
+    # Basic validation
+    if not all([name, service_id, experience, address, pin]):
+        return jsonify({'msg': 'Missing required fields', 'status': 'fail'}), 400
+    
+    # Create a new user with the role 'professional'
+    try:
+        new_professional = User(
+            name=name,
+            username=username,
+            role='professional',  # Role is set to 'professional'
+            service_id=service_id,
+            experience=experience,
+            description=description,
+            address=address,
+            pin=pin,
+            email=email,
+            mobile=mobile,
+            # You might want to hash the password, or set it properly
+            password=password  # For now, use a default password (can be updated later)
+        )
+        
+        db.session.add(new_professional)
+        db.session.commit()
+
+        return jsonify({'msg': 'Professional registered successfully', 'status': 'success'}), 201
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
