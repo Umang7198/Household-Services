@@ -14,7 +14,8 @@ class User(db.Model):
     address = db.Column(db.String(255), nullable=False)
     pin = db.Column(db.String(6), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.now, nullable=False)
-    
+    verified = db.Column(db.Boolean, default=False,nullable=True)  # New field
+
     # Fields specific to professionals
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=True)  # Each professional is linked to one service
     experience = db.Column(db.Integer, nullable=True)  # Years of experience, applicable only to professionals

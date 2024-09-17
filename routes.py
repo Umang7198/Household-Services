@@ -133,9 +133,7 @@ def delete_service(service_id):
         return jsonify({'msg': f'Failed to delete service: {str(e)}', 'status': 'error'}), 500
 
 
-from flask import Flask, request, jsonify
-from models import db, User, Service
-from werkzeug.security import generate_password_hash
+
 
 @app.route('/register/professional', methods=['POST'])
 def register_professional():
@@ -177,6 +175,55 @@ def register_professional():
 
         return jsonify({'msg': 'Professional registered successfully', 'status': 'success'}), 201
     
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
+
+@app.route('/professionals/unverified', methods=['GET'])
+def get_unverified_professionals():
+    # Fetch professionals with verified=False
+    unverified_professionals = User.query.filter_by(role='professional', verified=False).all()
+    
+    professionals_list = [
+        {
+            'id': professional.id,
+            'name': professional.name,
+            'service_name': professional.service.name if professional.service else None,  # Get the service name from the related Service model
+            'experience': professional.experience,
+            'description': professional.description,
+            'address': professional.address,
+            'pin': professional.pin
+        } for professional in unverified_professionals
+    ]
+    return jsonify(professionals_list), 200
+
+
+@app.route('/professional/approve/<int:professional_id>', methods=['PUT'])
+def approve_professional(professional_id):
+    professional = User.query.filter_by(id=professional_id, role='professional').first()
+    
+    if not professional or professional.verified:
+        return jsonify({'msg': 'Professional not found or already verified', 'status': 'fail'}), 404
+    
+    try:
+        professional.verified = True
+        db.session.commit()
+        return jsonify({'msg': 'Professional approved successfully', 'status': 'success'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
+
+@app.route('/professional/reject/<int:professional_id>', methods=['DELETE'])
+def reject_professional(professional_id):
+    professional = User.query.filter_by(id=professional_id, role='professional').first()
+
+    if not professional or professional.verified:
+        return jsonify({'msg': 'Professional not found or already verified', 'status': 'fail'}), 404
+
+    try:
+        db.session.delete(professional)
+        db.session.commit()
+        return jsonify({'msg': 'Professional rejected and deleted successfully', 'status': 'success'}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
