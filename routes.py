@@ -227,3 +227,49 @@ def reject_professional(professional_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
+
+
+@app.route('/register/customer', methods=['POST'])
+def register_customer():
+    data = request.get_json()
+
+    # Extract data from the request
+    name = data.get('name')
+    email = data.get('email')
+    mobile = data.get('mobile')
+    username = data.get('username')
+    password = data.get('password')
+    address = data.get('address')
+    pin = data.get('pin')
+    
+    # Basic validation
+    if not all([name, email, mobile, username, password, address, pin]):
+        return jsonify({'msg': 'Missing required fields', 'status': 'fail'}), 400
+
+    # Check if the username or email already exists
+    existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
+    if existing_user:
+        return jsonify({'msg': 'User with this email or username already exists', 'status': 'fail'}), 400
+
+
+    # Create a new customer
+    try:
+        new_customer = User(
+            name=name,
+            email=email,
+            mobile=mobile,
+            username=username,
+            password=password,
+            address=address,
+            pin=pin,
+            role='customer'  # Role is set to 'customer'
+        )
+        
+        db.session.add(new_customer)
+        db.session.commit()
+
+        return jsonify({'msg': 'Customer registered successfully', 'status': 'success'}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500

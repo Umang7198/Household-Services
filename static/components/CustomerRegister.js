@@ -38,7 +38,7 @@ export default {
                                     <input type="text" v-model="address" id="address" class="form-control" placeholder="Enter your address" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="pin" class="form-label">Postal Code</label>
+                                    <label for="pin" class="form-label">Pin Code</label>
                                     <input type="text" v-model="pin" id="pin" class="form-control" placeholder="Enter your postal code" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100">Register</button>
@@ -65,7 +65,7 @@ export default {
     methods: {
         async register() {
             try {
-                const response = await fetch('/register', {
+                const response = await fetch('/register/customer', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -81,7 +81,7 @@ export default {
                 });
 
                 if (response.ok) {
-                    window.location.href = '/login/customer';  // Redirect to customer login after successful registration
+                    this.$router.push('/login/customer');
                 } else {
                     const data = await response.json();
                     this.error = data.msg || 'Registration failed';
