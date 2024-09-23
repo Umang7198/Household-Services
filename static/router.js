@@ -7,6 +7,7 @@ import CustomerRegister from "./components/CustomerRegister.js";
 import ProfessionalRegister from "./components/ProfessionalRegister.js";
 import AdminDashboard from "./components/AdminDashboard.js";
 import AddService from "./components/AddService.js";
+import CustomerDashboard from "./components/CustomerDashboard.js";
 export default new VueRouter({
     mode: 'history',
     routes: [
@@ -18,6 +19,7 @@ export default new VueRouter({
       { path: '/register/professionl', component: ProfessionalRegister},
       { path: '/admin/dashboard', component: AdminDashboard},
       { path: '/add-service', component: AddService },
+      { path: '/customer/dashboard', component: CustomerDashboard},
 
     ],
 });

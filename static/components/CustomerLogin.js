@@ -50,14 +50,16 @@ export default {
                     body: JSON.stringify({ username: this.username, password: this.password, role: this.role })
                 });
 
-                if (response.ok) {
-                    window.location.href = '/';
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Redirect to customer dashboard or home page on successful login
+                    this.$router.push('/customer/dashboard');
                 } else {
-                    const data = await response.json();
-                    this.error = data.msg || 'Login failed';
+                    this.error = result.msg;
                 }
             } catch (err) {
-                this.error = 'An error occurred';
+                this.error = 'An error occurred. Please try again.';
             }
         }
     }
