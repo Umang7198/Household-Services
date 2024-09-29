@@ -5,6 +5,8 @@ export default {
       services: [],
       professionals: [],  // Professionals awaiting approval
       serviceRequests: [],
+      categories: [],  // Initialize categories
+      selectedCategory: null,  // Initialize selected category
       editMode: false,  // To toggle edit mode for services
       serviceToEdit: {
         id: null,
@@ -13,14 +15,21 @@ export default {
         description: '',
         time_required: ''
       },
+      newCategory: {
+        name: '',
+        description: ''
+      },
       successMessage: '',
       error: '',
+      showCategoryForm: false  // To toggle add category form modal
+
     };
   },
   created() {
-    this.fetchServices();
+    this.fetchServices();  // Call the fetchServices method
     this.fetchProfessionals();  // Fetch professionals awaiting approval
     this.fetchServiceRequests();
+    this.fetchCategories();  // Fetch categories
   },
   methods: {
     async logout() {
@@ -45,16 +54,18 @@ export default {
     },
     async fetchServices() {
       try {
-        const response = await fetch('/services');  // Call to the Flask backend to fetch services
+        const response = await fetch('/services');  // Replace with your actual API URL
         if (response.ok) {
-          this.services = await response.json();  // Update services with the fetched data
+          this.services = await response.json();  // Populate services
         } else {
           this.error = 'Failed to fetch services';
         }
-      } catch (err) {
+      } catch (err) { 
         this.error = 'An error occurred while fetching services';
       }
     },
+    
+    
     async fetchProfessionals() {
       try {
         const response = await fetch('/professionals/unverified');
@@ -79,13 +90,98 @@ export default {
         this.error = 'An error occurred while fetching service requests';
       }
     },
-    goToAddService() {
-      this.$router.push('/add-service');
+    async fetchCategories() {
+      try {
+        const response = await fetch('/service-categories');
+        if (response.ok) {
+          this.categories = await response.json();
+        } else {
+          this.error = 'Failed to fetch service categories';
+        }
+      } catch (err) {
+        this.error = 'An error occurred while fetching categories';
+      }
+    },
+    
+    // Add a new category
+    async saveCategory() {
+      const url = this.newCategory.id ? `/service-categories/${this.newCategory.id}` : '/service-categories';
+      const method = this.newCategory.id ? 'PUT' : 'POST';
+
+      try {
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(this.newCategory)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          this.successMessage = this.newCategory.id ? 'Category updated successfully' : 'Category added successfully';
+          this.fetchCategories();  // Refresh categories after adding/editing
+          this.resetCategoryForm();
+          this.showCategoryForm = false;  // Hide the form after submission
+        } else {
+          this.error = result.msg || 'Failed to save category';
+        }
+      } catch (error) {
+        this.error = 'An error occurred while saving the category';
+      }
+    },
+    async deleteCategory(id) {
+      if (!confirm('Are you sure you want to delete this category?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/service-categories/${id}`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          this.successMessage = 'Category deleted successfully';
+          this.fetchCategories();  // Refresh categories after deletion
+        } else {
+          this.error = result.msg || 'Failed to delete category';
+        }
+      } catch (error) {
+        this.error = 'An error occurred while deleting the category';
+      }
+    },
+    
+    // Show form to add category
+    showAddCategoryForm() {
+      this.resetCategoryForm();  // Reset form for new entry
+      this.showCategoryForm = true;
+    },
+    showEditCategoryForm(category) {
+      this.newCategory = { ...category };  // Populate newCategory with selected category details
+      this.showCategoryForm = true;        // Show the edit form
+    },
+    // Hide the add/edit category form
+    hideCategoryForm() {
+      this.resetCategoryForm();
+      this.showCategoryForm = false;
+    },
+
+    // Reset the category form
+    resetCategoryForm() {
+      this.newCategory = { id: null, name: '', description: '' };  // Reset the form fields
+      this.successMessage = '';
+      this.error = '';
     },
     editService(service) {
       // Enable edit mode and populate the form with the service details
       this.serviceToEdit = { ...service };
       this.editMode = true;
+    },
+    navigateToServices(categoryId) {
+      this.$router.push(`/services/${categoryId}`);
     },
     async updateService() {
       try {
@@ -174,6 +270,7 @@ export default {
         }
       }
     },
+    
     async deleteProfessional(id) {
       if (confirm('Are you sure you want to delete this professional?')) {
         try {
@@ -194,130 +291,160 @@ export default {
     }
   },
   template: `
-    <div class="container mt-5">
-      <h1 class="text-center mb-4">Welcome to Admin Dashboard</h1>
+  
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Welcome to Admin Dashboard</h1>
 
-      <!-- Navigation Bar -->
-      <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <a class="navbar-brand" href="#">Admin Panel</a>
-        <div class="collapse navbar-collapse">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Search</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Summary</a></li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" @click.prevent="logout" style="cursor: pointer;">Logout</a> 
-            </li>        
-          </ul>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 shadow-sm">
+      <a class="navbar-brand" href="#">Admin Panel</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Search</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Summary</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="logout" style="cursor: pointer;">Logout</a> 
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+  <!-- Service Categories Section -->
+<section class="mb-5">
+  <h3 class="text-muted">Service Categories</h3>
+
+  <div class="row g-3"> <!-- Added g-3 for consistent gap between cards -->
+    <div class="col-md-3" v-for="category in categories" :key="category.id">
+
+      <div class="card shadow-sm border-0" style="cursor: pointer;" @click="navigateToServices(category.id)">
+        <!-- Card container for name and buttons -->
+        <div class="card-body p-3 border rounded d-flex flex-column align-items-center justify-content-center">
+          <h5 class="card-title text-center mb-4">{{ category.name }}</h5>
+          <div class="d-flex justify-content-center">
+            <button class="btn btn-warning me-2" @click.stop="showEditCategoryForm(category)">Edit</button>
+            <button class="btn btn-danger" @click.stop="deleteCategory(category.id)">Delete</button>
+          </div>
         </div>
-      </nav>
-
-      <!-- Services Section -->
-      <section class="mb-5">
-        <h3>Services</h3>
-
-        <!-- Edit Service Form -->
-        <div v-if="editMode" class="card p-3 mb-3">
-          <h4>Edit Service</h4>
-          <form @submit.prevent="updateService">
-            <div class="form-group">
-              <label for="serviceName">Service Name</label>
-              <input type="text" v-model="serviceToEdit.name" class="form-control" id="serviceName" required>
-            </div>
-            <div class="form-group">
-              <label for="basePrice">Base Price (₹)</label>
-              <input type="number" v-model="serviceToEdit.base_price" class="form-control" id="basePrice" required>
-            </div>
-            <div class="form-group">
-              <label for="description">Description</label>
-              <textarea v-model="serviceToEdit.description" class="form-control" id="description" required></textarea>
-            </div>
-            <div class="form-group">
-              <label for="timeRequired">Time Required (minutes)</label>
-              <input type="number" v-model="serviceToEdit.time_required" class="form-control" id="timeRequired" required>
-            </div>
-            <button type="submit" class="btn btn-success">Update Service</button>
-            <button type="button" @click="cancelEdit" class="btn btn-secondary">Cancel</button>
-          </form>
-        </div>
-
-        <!-- Service List -->
-        <table class="table table-striped" v-if="!editMode">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Service Name</th>
-              <th>Base Price (₹)</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="service in services" :key="service.id">
-              <td>{{ service.id }}</td>
-              <td>{{ service.name }}</td>
-              <td>{{ service.base_price }}</td>
-              <td>
-                  <button class="btn btn-primary btn-sm" @click="editService(service)">Edit</button>
-                  <button class="btn btn-danger btn-sm" @click="deleteService(service.id)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <button @click="goToAddService" class="btn btn-primary mt-2">Add New Service</button>
-      </section>
-
-      <!-- Professionals Awaiting Approval -->
-      <section class="mb-5">
-        <h3>Professionals Awaiting Approval</h3>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Service</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="professional in professionals" :key="professional.id">
-              <td>{{ professional.id }}</td>
-              <td>{{ professional.name }}</td>
-              <td>{{ professional.service_name }}</td>
-              <td>
-                <button @click="approveProfessional(professional.id)" class="btn btn-success btn-sm">Approve</button>
-                <button @click="rejectProfessional(professional.id)" class="btn btn-danger btn-sm">Reject</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <!-- Service Requests Section -->
-      <section>
-        <h3>Service Requests</h3>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Request ID</th>
-              <th>Customer Name</th>
-              <th>Service</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="request in serviceRequests" :key="request.id">
-              <td>{{ request.id }}</td>
-              <td>{{ request.customer_name }}</td>
-              <td>{{ request.service_name }}</td>
-              <td>{{ request.status }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <!-- Success and Error Messages -->
-      <div v-if="successMessage" class="alert alert-success mt-4">{{ successMessage }}</div>
-      <div v-if="error" class="alert alert-danger mt-4">{{ error }}</div>
+      </div>
     </div>
+
+    <!-- Add Category Button -->
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0 text-center" style="cursor: pointer;" @click="showAddCategoryForm">
+        <div class="card-body p-3 border rounded d-flex align-items-center justify-content-center" style="height: 150px;">
+          <h5 class="card-title mb-0">+ Add Category</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add/Edit Category Form Modal -->
+<div v-if="showCategoryForm" class="modal" style="display: block;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ newCategory.id ? 'Edit Category' : 'Add New Category' }}</h5>
+        <button type="button" class="btn-close" @click="hideCategoryForm"></button> <!-- Updated close button -->
+      </div>
+      <div class="modal-body">
+        <div class="form-group mb-3"> <!-- Add margin-bottom for spacing -->
+          <label for="categoryName">Category Name</label>
+          <input type="text" id="categoryName" v-model="newCategory.name" class="form-control" required>
+        </div>
+        <div class="form-group mb-3">
+          <label for="categoryDescription">Description</label>
+          <textarea id="categoryDescription" v-model="newCategory.description" class="form-control"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" @click="hideCategoryForm">Cancel</button>
+        <button type="button" class="btn btn-primary" @click="saveCategory">{{ newCategory.id ? 'Save Changes' : 'Add Category' }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+    <!-- Services for Selected Category -->
+    <section v-if="selectedCategory" class="mb-5">
+      <h3 class="text-muted">Services for {{ selectedCategory.name }}</h3>
+      <table class="table table-hover shadow-sm rounded">
+        <thead class="thead-dark">
+          <tr>
+            <th>ID</th>
+            <th>Service Name</th>
+            <th>Base Price (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="service in categoryServices" :key="service.id">
+            <td>{{ service.id }}</td>
+            <td>{{ service.name }}</td>
+            <td>{{ service.base_price }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Professionals Awaiting Approval -->
+    <section class="mb-5">
+      <h3 class="text-muted">Professionals Awaiting Approval</h3>
+      <table class="table table-hover shadow-sm rounded">
+        <thead class="thead-dark">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Service</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="professional in professionals" :key="professional.id">
+            <td>{{ professional.id }}</td>
+            <td>{{ professional.name }}</td>
+            <td>{{ professional.service_name }}</td>
+            <td>
+              <button @click="approveProfessional(professional.id)" class="btn btn-success btn-sm mr-2">Approve</button>
+              <button @click="rejectProfessional(professional.id)" class="btn btn-danger btn-sm">Reject</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Service Requests Section -->
+    <section class="mb-5">
+      <h3 class="text-muted">Service Requests</h3>
+      <table class="table table-hover shadow-sm rounded">
+        <thead class="thead-dark">
+          <tr>
+            <th>Request ID</th>
+            <th>Customer Name</th>
+            <th>Service</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="request in serviceRequests" :key="request.id">
+            <td>{{ request.id }}</td>
+            <td>{{ request.customer_name }}</td>
+            <td>{{ request.service_name }}</td>
+            <td>{{ request.status }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Success and Error Messages -->
+    <div v-if="successMessage" class="alert alert-success mt-4">{{ successMessage }}</div>
+    <div v-if="error" class="alert alert-danger mt-4">{{ error }}</div>
+  </div>
+
   `
 };

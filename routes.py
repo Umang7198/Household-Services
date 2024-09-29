@@ -1,4 +1,4 @@
-from models import db, User,Service,ServiceRequest
+from models import db, User,Service,ServiceRequest,ServiceCategory,Rating
 from werkzeug.security import check_password_hash, generate_password_hash
 from config import app,db
 from flask import Flask, request, redirect, render_template, url_for, session,abort,flash,jsonify
@@ -57,46 +57,62 @@ def create_service_request():
 
 @app.route('/service', methods=['POST'])
 def add_service():
-    # Get data from the request
     data = request.get_json()
     name = data.get('name')
     description = data.get('description')
     base_price = data.get('base_price')
     time_required = data.get('time_required')
+    category_id = data.get('category_id')  # Get the category_id from the request
 
-    # Check if required fields are provided
-    if not all([name, base_price, time_required]):
+    if not all([name, base_price, time_required, category_id]):
         return jsonify({'msg': 'Missing required fields', 'status': 'fail'}), 400
 
-    # Create a new service instance
     service = Service(
         name=name,
         description=description,
         base_price=base_price,
-        time_required=time_required
+        time_required=time_required,
+        category_id=category_id  # Associate service with category
     )
 
-    # Add the service to the database
     try:
         db.session.add(service)
         db.session.commit()
         return jsonify({'msg': 'Service added successfully', 'status': 'success'}), 201
     except Exception as e:
-        db.session.rollback()  # Rollback in case of any error
+        db.session.rollback()
         return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
 
+@app.route('/service-categories', methods=['GET'])
+def get_service_categories():
+    try:
+        # Assuming you have a model named ServiceCategory
+        categories = ServiceCategory.query.all()
+        result = [{'id': category.id, 'name': category.name} for category in categories]
+        return jsonify(result), 200
+    except Exception as e:
+        # Log the error for debugging
+        app.logger.error(f"Error fetching service categories: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
 
 @app.route('/services', methods=['GET'])
-def get_services():
-    services = Service.query.all()  # Fetch all services from the database
-    service_list = [
-        {
-            'id': service.id,
-            'name': service.name,
-            'base_price': service.base_price
-        } for service in services
-    ]
-    return jsonify(service_list), 200
+def get_services_by_category():
+    category_id = request.args.get('category')
+    if category_id:
+        services = Service.query.filter_by(category_id=category_id).all()
+    else:
+        services = Service.query.all()
+
+    services_list = [{
+        "id": service.id,
+        "name": service.name,
+        "base_price": service.base_price,
+        "time_required":service.time_required,
+        "categoryName": service.category.name  # Assuming Service has a relationship with Category
+    } for service in services]
+
+    return jsonify(services_list)
+
 
 
 @app.route('/service/<int:service_id>', methods=['PUT'])
@@ -118,6 +134,7 @@ def update_service(service_id):
         db.session.rollback()
         return jsonify({'msg': f'Failed to update service: {str(e)}', 'status': 'error'}), 500
 
+
 @app.route('/service/<int:service_id>', methods=['DELETE'])
 def delete_service(service_id):
     service = Service.query.get(service_id)
@@ -131,7 +148,6 @@ def delete_service(service_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'msg': f'Failed to delete service: {str(e)}', 'status': 'error'}), 500
-
 
 
 
@@ -273,3 +289,55 @@ def register_customer():
     except Exception as e:
         db.session.rollback()
         return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
+
+
+@app.route('/service-categories', methods=['POST'])
+def create_category():
+    try:
+        data = request.json
+        name = data.get('name')
+        description = data.get('description')
+
+        # Ensure that name is provided
+        if not name:
+            return jsonify({'msg': 'Category name is required'}), 400
+
+        # Create new category
+        new_category = ServiceCategory(name=name, description=description)
+        db.session.add(new_category)
+        db.session.commit()
+
+        return jsonify({'msg': 'Category added successfully'}), 201
+    except Exception as e:
+        return jsonify({'msg': 'An error occurred while adding the category', 'error': str(e)}), 500
+
+@app.route('/service-categories/<int:category_id>', methods=['PUT'])
+def update_category(category_id):
+    try:
+        category = ServiceCategory.query.get(category_id)
+        if not category:
+            return jsonify({'msg': 'Category not found'}), 404
+        
+        data = request.json
+        category.name = data.get('name', category.name)
+        category.description = data.get('description', category.description)
+
+        db.session.commit()
+
+        return jsonify({'msg': 'Category updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'msg': 'An error occurred while updating the category', 'error': str(e)}), 500
+
+@app.route('/service-categories/<int:category_id>', methods=['DELETE'])
+def delete_category(category_id):
+    try:
+        category = ServiceCategory.query.get(category_id)
+        if not category:
+            return jsonify({'msg': 'Category not found'}), 404
+
+        db.session.delete(category)
+        db.session.commit()
+
+        return jsonify({'msg': 'Category deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'msg': 'An error occurred while deleting the category', 'error': str(e)}), 500

@@ -14,7 +14,7 @@ def add_admin():
         {
             "name": "Admin",
             "email": "admin@householdservices.com",
-            "mobile": "9876543210",
+            "mobile": "9876543211",
             "username": "admin",
             "password": "Admin@123",
             "role": "admin",
