@@ -150,7 +150,6 @@ def delete_service(service_id):
         return jsonify({'msg': f'Failed to delete service: {str(e)}', 'status': 'error'}), 500
 
 
-
 @app.route('/register/professional', methods=['POST'])
 def register_professional():
     data = request.get_json()
@@ -161,31 +160,38 @@ def register_professional():
     description = data.get('description')
     address = data.get('address')
     pin = data.get('pin')
-    password=data.get('password')
-    email=data.get('email')
-    mobile=data.get('mobile')
-    username=data.get('username')
+    password = data.get('password')
+    email = data.get('email')
+    mobile = data.get('mobile')
+    username = data.get('username')
+
     # Basic validation
-    if not all([name, service_id, experience, address, pin]):
+    if not all([name, service_id, experience, address, pin, password, email, mobile, username]):
         return jsonify({'msg': 'Missing required fields', 'status': 'fail'}), 400
-    
-    # Create a new user with the role 'professional'
+
     try:
+        # Find the selected service
+        service = Service.query.get(service_id)
+        if not service:
+            return jsonify({'msg': 'Invalid service selected', 'status': 'fail'}), 400
+
+        # Create a new professional (User with role 'professional')
         new_professional = User(
             name=name,
             username=username,
             role='professional',  # Role is set to 'professional'
-            service_id=service_id,
             experience=experience,
             description=description,
             address=address,
             pin=pin,
             email=email,
             mobile=mobile,
-            # You might want to hash the password, or set it properly
-            password=password  # For now, use a default password (can be updated later)
+            password=password  # Consider hashing the password for security
         )
-        
+
+        # Add the service to the professional's services (many-to-many relationship)
+        new_professional.professional_services.append(service)
+
         db.session.add(new_professional)
         db.session.commit()
 
@@ -194,6 +200,7 @@ def register_professional():
     except Exception as e:
         db.session.rollback()
         return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
+
 
 @app.route('/professionals/unverified', methods=['GET'])
 def get_unverified_professionals():
@@ -204,15 +211,15 @@ def get_unverified_professionals():
         {
             'id': professional.id,
             'name': professional.name,
-            'service_name': professional.service.name if professional.service else None,  # Get the service name from the related Service model
+            'services': [{'id': service.id, 'name': service.name} for service in professional.professional_services],  # 'services' not 'professional_services'
             'experience': professional.experience,
             'description': professional.description,
             'address': professional.address,
             'pin': professional.pin
         } for professional in unverified_professionals
     ]
+    print(jsonify(professionals_list))
     return jsonify(professionals_list), 200
-
 
 @app.route('/professional/approve/<int:professional_id>', methods=['PUT'])
 def approve_professional(professional_id):

@@ -13,6 +13,9 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False, default='customer')  # Role can be 'customer', 'professional', 'admin'
     address = db.Column(db.String(255), nullable=False)
     pin = db.Column(db.String(6), nullable=False)
+    experience = db.Column(db.Integer, nullable=True)  # Years of experience, nullable for non-professionals
+    description = db.Column(db.String(500), nullable=True)  # Professional description
+    
     date_created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     verified = db.Column(db.Boolean, default=False, nullable=True)  # New field
     

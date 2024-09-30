@@ -16,7 +16,7 @@ def add_admin():
             "email": "admin@householdservices.com",
             "mobile": "9876543211",
             "username": "admin",
-            "password": "Admin@123",
+            "password": "admin",
             "role": "admin",
             "address": "N/A",  # Provide a default address for admin
             "pin": "000000"  # Provide a default pin for admin

@@ -71,6 +71,7 @@ export default {
         const response = await fetch('/professionals/unverified');
         if (response.ok) {
           this.professionals = await response.json();
+          // console.log(this.professionals)
         } else {
           this.error = 'Failed to fetch professionals';
         }
@@ -243,7 +244,7 @@ export default {
 
           if (response.ok) {
             this.successMessage = 'Professional approved successfully';
-            this.professionals = this.professionals.filter(professional => professional.id !== id);  // Remove from the list
+            this.professionals = this.professionals.filter(professional => professional.id !== id);  // Remove from the list  
           } else {
             this.error = 'Failed to approve the professional';
           }
@@ -271,24 +272,6 @@ export default {
       }
     },
     
-    async deleteProfessional(id) {
-      if (confirm('Are you sure you want to delete this professional?')) {
-        try {
-          const response = await fetch(`/professional/${id}`, {
-            method: 'DELETE',
-          });
-
-          if (response.ok) {
-            this.successMessage = 'Professional deleted successfully';
-            this.professionals = this.professionals.filter(professional => professional.id !== id);  // Remove from the list
-          } else {
-            this.error = 'Failed to delete the professional';
-          }
-        } catch (error) {
-          this.error = 'An error occurred while deleting the professional';
-        }
-      }
-    }
   },
   template: `
   
@@ -408,7 +391,7 @@ export default {
           <tr v-for="professional in professionals" :key="professional.id">
             <td>{{ professional.id }}</td>
             <td>{{ professional.name }}</td>
-            <td>{{ professional.service_name }}</td>
+            <td>{{ professional.services[0].name }}</td>
             <td>
               <button @click="approveProfessional(professional.id)" class="btn btn-success btn-sm mr-2">Approve</button>
               <button @click="rejectProfessional(professional.id)" class="btn btn-danger btn-sm">Reject</button>

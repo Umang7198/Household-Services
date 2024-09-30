@@ -124,7 +124,7 @@ export default {
       saveService() {
         const categoryId = this.$route.params.categoryId; // Get the category ID from the route
         const url = this.selectedService.id
-          ? `/services/${this.selectedService.id}` // Update URL to point to the specific service
+          ? `/service/${this.selectedService.id}` // Update URL to point to the specific service
           : `/service`; // Corrected to use the /service endpoint
       
         const method = this.selectedService.id ? 'PUT' : 'POST';
