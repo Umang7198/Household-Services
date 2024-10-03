@@ -1,4 +1,4 @@
-from models import db, User,Service,ServiceRequest,ServiceCategory,Rating
+from models import db, User,Service,ServiceRequest,ServiceCategory,Rating,professional_services
 from werkzeug.security import check_password_hash, generate_password_hash
 from config import app,db
 from flask import Flask, request, redirect, render_template, url_for, session,abort,flash,jsonify
@@ -33,7 +33,15 @@ def login():
     # Check if the role matches and password is correct
     if user.role == role and user.password== password:
         session['user_id'] = user.id  # Save user ID in the session
-        return jsonify({'msg': f'{role.capitalize()} login successful', 'status': 'success'}), 200
+        return jsonify({
+                    'msg': f'{role.capitalize()} login successful', 
+                    'status': 'success', 
+                    'user': {
+                        'id': user.id,
+                        'name': user.name,
+                        'email': user.email
+                    }
+                }), 200
     else:
         return jsonify({'msg': 'Invalid credentials or role', 'status': 'fail'}), 401
 
@@ -348,3 +356,71 @@ def delete_category(category_id):
         return jsonify({'msg': 'Category deleted successfully'}), 200
     except Exception as e:
         return jsonify({'msg': 'An error occurred while deleting the category', 'error': str(e)}), 500
+
+
+
+def find_best_professional(service_id, customer_pin):
+    # Debug step: Log the service_id and customer_pin
+    print(f"Service ID: {service_id}, Customer Pin: {customer_pin}")
+    
+    # Step 1: First try to find professionals in the same pin code
+    best_professional = db.session.query(User).join(professional_services).filter(
+        professional_services.c.service_id == service_id,  # Match the service
+        User.role == 'professional',
+        User.verified == True,
+        User.pin == customer_pin
+    ).order_by(User.rating.desc(), User.workload.asc()).first()
+
+    # Debug step: Check if a professional was found
+    if best_professional:
+        print(f"Best professional found in same pin: {best_professional.name}")
+    else:
+        print("No professional found in same pin code")
+
+    # Step 2: If no professional is found in the same pin code, expand the search
+    if not best_professional:
+        best_professional = db.session.query(User).join(professional_services).filter(
+            professional_services.c.service_id == service_id,  # Match the service
+            User.role == 'professional',
+            User.verified == True
+        ).order_by(User.rating.desc(), User.workload.asc()).first()
+
+        # Debug step: Check if a professional was found in nearby pins
+        if best_professional:
+            print(f"Best professional found in other pins: {best_professional.name}")
+        else:
+            print("No professional found in other pins either")
+    
+    return best_professional
+
+
+
+
+@app.route('/book-service', methods=['POST'])
+def book_service():
+    customer_id = request.json.get('customer_id')
+    service_id = request.json.get('service_id')
+    customer = User.query.get(customer_id)
+    if not customer or customer.role != 'customer':
+        return jsonify({'error': 'Invalid customer'}), 400
+    
+    # Find the best professional based on the logic above
+    best_professional = find_best_professional(service_id, customer.pin)
+    print(best_professional)
+    if not best_professional:
+        return jsonify({'error': 'No professionals available'}), 400
+    
+    # Create a new ServiceRequest
+    service_request = ServiceRequest(
+        service_id=service_id,
+        customer_id=customer.id,
+        professional_id=best_professional.id,
+        price=100  # Example price, adjust as necessary
+    )
+    
+    # Update professional's workload
+    best_professional.workload += 1
+    db.session.add(service_request)
+    db.session.commit()
+    
+    return jsonify({'message': 'Service booked successfully', 'professional': best_professional.name}), 200

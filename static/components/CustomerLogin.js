@@ -51,8 +51,12 @@ export default {
                 });
 
                 const result = await response.json();
-
+                console.log(result)
                 if (result.status === 'success') {
+                    const user = result.user;  // Assuming the user info is returned as 'user'
+                    console.log(user)
+
+                    localStorage.setItem('customer_id', user.id);
                     // Redirect to customer dashboard or home page on successful login
                     this.$router.push('/customer/dashboard');
                 } else {
@@ -61,6 +65,7 @@ export default {
             } catch (err) {
                 this.error = 'An error occurred. Please try again.';
             }
+            
         }
     }
 };

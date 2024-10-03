@@ -39,8 +39,8 @@ with app.app_context():
 
     # Add Users (Professionals and Customers)
     users = [
-        User(name="John Doe", email="john@electric.com", mobile="1234567890", username="john", password="john", role="professional",experience="4", address="123 Main St", pin="123456", verified=True),
-        User(name="Sarah Lee", email="sarah@cleanhome.com", mobile="9876543210", username="sarah_clean", password="hashed_password", role="professional", experience="4",address="456 Elm St", pin="654321", verified=True),
+        User(name="John Doe", email="john@electric.com", mobile="1234567890", username="john", password="john", role="professional",experience="4", address="123 Main St", pin="123456",rating="4.5",workload="2", verified=True),
+        User(name="Sarah Lee", email="sarah@cleanhome.com", mobile="9876543210", username="sarah_clean", password="hashed_password", role="professional", experience="4",address="456 Elm St", pin="654321", verified=True,rating="4",workload="6",),
         User(name="Alice Smith", email="alice@domain.com", mobile="1122334455", username="alice", password="alice", role="customer", address="789 Maple Ave", pin="987654", verified=False),
         User(name="Bob Brown", email="bob@domain.com", mobile="2233445566", username="bob", password="bob", role="customer", address="123 Pine St", pin="654321", verified=False)
     ]

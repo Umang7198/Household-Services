@@ -16,6 +16,9 @@ class User(db.Model):
     experience = db.Column(db.Integer, nullable=True)  # Years of experience, nullable for non-professionals
     description = db.Column(db.String(500), nullable=True)  # Professional description
     
+    rating = db.Column(db.Float, nullable=True, default=0.0)  # Average rating for professionals
+    workload = db.Column(db.Integer, default=0)  # Number of ongoing services, can be used to balance assignment
+
     date_created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     verified = db.Column(db.Boolean, default=False, nullable=True)  # New field
     
@@ -66,7 +69,7 @@ class ServiceRequest(db.Model):
     service_status = db.Column(db.String(50), nullable=False, default='requested')
     remarks = db.Column(db.String(500), nullable=True)
     price = db.Column(db.Float, nullable=False)
-
+    
     # Relationships
     service = db.relationship('Service', back_populates='service_requests')
     customer = db.relationship('User', foreign_keys=[customer_id], back_populates='customer_requests')
