@@ -45,28 +45,31 @@ export default {
             </section>
 
             <!-- Services for Selected Category Section -->
-            <section v-if="selectedCategory" class="mb-5">
-                <h3 class="text-muted">Services for {{ selectedCategory.name }}</h3>
-                <table class="table table-hover shadow-sm rounded">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Service Name</th>
-                            <th>Base Price (₹)</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="service in categoryServices" :key="service.id">
-                            <td>{{ service.name }}</td>
-                            <td>{{ service.base_price }}</td>
-                            <td>
-                                <button class="btn btn-primary" @click="bookService(service)">Book Now</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
+                <section v-if="selectedCategory" class="mb-5">
+                    <h3 class="text-muted">Services for {{ selectedCategory.name }}</h3>
+                    <table class="table table-hover shadow-sm rounded">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Service Name</th>
+                                <th>Base Price (₹)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="service in categoryServices" :key="service.id">
+                                <td>{{ service.name }}</td>
+                                <td>{{ service.base_price }}</td>
+                                <td>
+                                    <!-- Button changes based on service status -->
+                                    <button v-if="service.status !== 'Requested'" class="btn btn-primary" @click="bookService(service)">Book Now</button>
+                                    <button v-else class="btn btn-secondary" disabled>Requested</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
 
+    
             <!-- Service History Section -->
             <div class="row justify-content-center">
                 <div class="col-md-10">
@@ -92,7 +95,9 @@ export default {
                                         <td>
                                             <span v-if="service.status === 'Closed'">Closed</span>
                                             <span v-if="service.status === 'Requested'">Requested</span>
-                                            <a v-if="service.status === 'Active'" href="#" @click.prevent="closeService(service.id)">Close it?</a>
+                                            
+                                            <!-- Show "Close it?" for accepted services -->
+                                            <a v-if="service.status === 'Accepted'" href="#" @click.prevent="closeService(service.id)">Close it?</a>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -101,18 +106,14 @@ export default {
                     </div>
                 </div>
             </div>
-        </div>
+        </div>            
     `,
     data() {
         return {
             categories: [],  // Fetched service categories
             categoryServices: [],  // Services for the selected category
             selectedCategory: null,  // The selected service category
-            serviceHistory: [  // Placeholder service history data
-                { id: 1, name: 'Service1', professional: 'John Doe', phone: '1234567890', status: 'Active' },
-                { id: 2, name: 'Service2', professional: 'Jane Smith', phone: '0987654321', status: 'Closed' },
-                { id: 3, name: 'Service3', professional: 'Jim Brown', phone: '1122334455', status: 'Requested' }
-            ]
+            serviceHistory: [],
         };
     },
     mounted() {
@@ -125,6 +126,7 @@ export default {
             .catch(error => {
                 console.error("Error fetching categories:", error);
             });
+            this.fetchServiceHistory();
     },
     methods: {
         async logout() {
@@ -160,15 +162,13 @@ export default {
                 });
         },
         bookService(service) {
-            // Get customer_id from local storage or session (assuming you store it after login)
-            const customer_id = localStorage.getItem('customer_id');  // Example using local storage
-            console.log(customer_id)
-        
+            const customer_id = localStorage.getItem('customer_id');  // Retrieve customer_id
+            
             // Send request to book a service
             fetch('/book-service', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     service_id: service.id,
                     customer_id: customer_id  // Include customer_id in the request
                 })
@@ -176,6 +176,18 @@ export default {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Update the service object to show it as "Requested" instead of "Book Now"
+                    service.status = 'Requested';  // Assuming each service now has a 'status' field
+                    
+                    // Add the booked service to the service history
+                    this.serviceHistory.push({
+                        id: service.id,
+                        name: service.name,
+                        professional: data.professional,  // Name of the professional from the backend
+                        phone: '1234567890',  // Placeholder for professional's phone (fetch the actual value from the backend if available)
+                        status: 'Requested'
+                    });
+                    
                     alert("Service booked successfully!");
                 } else {
                     alert("Failed to book the service.");
@@ -186,12 +198,38 @@ export default {
             });
         },
         
+        
+        fetchServiceHistory() {
+            const customer_id = localStorage.getItem('customer_id');  // Retrieve the customer ID
+            console.log(customer_id)
+            // Fetch service history from the backend
+            fetch(`/service-history?customer_id=${customer_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    this.serviceHistory = data;  // Set the service history data
+                })
+                .catch(error => {
+                    console.error("Error fetching service history:", error);
+                });
+        },
         closeService(serviceId) {
-            // Logic to close a service
-            alert(`Service ${serviceId} closed`);
-            this.serviceHistory = this.serviceHistory.map(service => 
-                service.id === serviceId ? { ...service, status: 'Closed' } : service
-            );
+            // Close the service (send request to backend to mark it as closed)
+            fetch(`/close-service/${serviceId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the service status in the UI
+                        this.serviceHistory = this.serviceHistory.map(service =>
+                            service.id === serviceId ? { ...service, status: 'Closed' } : service
+                        );
+                    } else {
+                        alert('Failed to close the service.');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error closing service:", error);
+                });
         }
     }
-};
+    }

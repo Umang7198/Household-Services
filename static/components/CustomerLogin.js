@@ -54,7 +54,7 @@ export default {
                 console.log(result)
                 if (result.status === 'success') {
                     const user = result.user;  // Assuming the user info is returned as 'user'
-                    console.log(user)
+                    // console.log(user)
 
                     localStorage.setItem('customer_id', user.id);
                     // Redirect to customer dashboard or home page on successful login

@@ -2,6 +2,7 @@ from models import db, User,Service,ServiceRequest,ServiceCategory,Rating,profes
 from werkzeug.security import check_password_hash, generate_password_hash
 from config import app,db
 from flask import Flask, request, redirect, render_template, url_for, session,abort,flash,jsonify
+import datetime
 
 @app.route('/')
 def index():
@@ -371,11 +372,11 @@ def find_best_professional(service_id, customer_pin):
         User.pin == customer_pin
     ).order_by(User.rating.desc(), User.workload.asc()).first()
 
-    # Debug step: Check if a professional was found
-    if best_professional:
-        print(f"Best professional found in same pin: {best_professional.name}")
-    else:
-        print("No professional found in same pin code")
+    # # Debug step: Check if a professional was found
+    # if best_professional:
+    #     print(f"Best professional found in same pin: {best_professional.name}")
+    # else:
+    #     print("No professional found in same pin code")
 
     # Step 2: If no professional is found in the same pin code, expand the search
     if not best_professional:
@@ -386,10 +387,10 @@ def find_best_professional(service_id, customer_pin):
         ).order_by(User.rating.desc(), User.workload.asc()).first()
 
         # Debug step: Check if a professional was found in nearby pins
-        if best_professional:
-            print(f"Best professional found in other pins: {best_professional.name}")
-        else:
-            print("No professional found in other pins either")
+        # if best_professional:
+        #     print(f"Best professional found in other pins: {best_professional.name}")
+        # else:
+        #     print("No professional found in other pins either")
     
     return best_professional
 
@@ -400,27 +401,162 @@ def find_best_professional(service_id, customer_pin):
 def book_service():
     customer_id = request.json.get('customer_id')
     service_id = request.json.get('service_id')
-    customer = User.query.get(customer_id)
-    if not customer or customer.role != 'customer':
-        return jsonify({'error': 'Invalid customer'}), 400
     
-    # Find the best professional based on the logic above
+    # Fetch customer information
+    customer = User.query.get(customer_id)
+    
+    if not customer or customer.role != 'customer':
+        return jsonify({'success': False, 'message': 'Invalid customer'}), 400
+    
+    # Find the best professional based on the logic provided
     best_professional = find_best_professional(service_id, customer.pin)
-    print(best_professional)
+    
     if not best_professional:
-        return jsonify({'error': 'No professionals available'}), 400
+        return jsonify({'success': False, 'message': 'No professionals available'}), 400
     
     # Create a new ServiceRequest
-    service_request = ServiceRequest(
-        service_id=service_id,
-        customer_id=customer.id,
-        professional_id=best_professional.id,
-        price=100  # Example price, adjust as necessary
-    )
-    
-    # Update professional's workload
-    best_professional.workload += 1
-    db.session.add(service_request)
+    try:
+        service_request = ServiceRequest(
+            service_id=service_id,
+            customer_id=customer.id,
+            professional_id=best_professional.id,
+            price=100  # Example price, you can replace this with actual pricing logic
+        )
+        
+        # Update professional's workload
+        best_professional.workload += 1
+        
+        db.session.add(service_request)
+        db.session.commit()
+
+        # Return a success response with the professional's name
+        return jsonify({'success': True, 'message': 'Service booked successfully', 'professional': best_professional.name}), 200
+
+    except Exception as e:
+        db.session.rollback()  # Roll back changes in case of an error
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+from sqlalchemy import func
+
+@app.route('/professional/today-services', methods=['GET'])
+def get_today_services():
+    professional_id = request.args.get('professional_id')
+    # print(professional_id)
+    if not professional_id:
+        return jsonify({'msg': 'Missing professional ID'}), 400
+
+    # Ensure the professional exists
+    professional = User.query.filter_by(id=professional_id, role='professional').first()
+    # print(professional)
+    if not professional:
+        return jsonify({'msg': 'Unauthorized or professional not found'}), 403
+
+    # print(datetime.date.today())
+    today_services = ServiceRequest.query.filter(
+    ServiceRequest.professional_id == professional_id,
+    ServiceRequest.service_status == 'requested',
+    func.date(ServiceRequest.date_of_request) == datetime.date.today()
+    ).all()
+    # print(today_services)
+    service_data = [
+        {
+            'id': service.id,
+            'customerName': service.customer.name,
+            'phone': service.customer.mobile,
+            'location': f"{service.customer.address}, {service.customer.pin}",
+        } for service in today_services
+    ]
+    return jsonify(service_data), 200
+
+@app.route('/professional/closed-services', methods=['GET'])
+def get_closed_services():
+    professional_id = request.args.get('professional_id')
+
+    if not professional_id:
+        return jsonify({'msg': 'Missing professional ID'}), 400
+
+    # Ensure the professional exists
+    professional = User.query.filter_by(id=professional_id, role='professional').first()
+    if not professional:
+        return jsonify({'msg': 'Unauthorized or professional not found'}), 403
+
+    closed_services = ServiceRequest.query.filter_by(
+        professional_id=professional_id,
+        service_status='closed'
+    ).all()
+
+    service_data = [
+        {
+            'id': service.id,
+            'customerName': service.customer.name,
+            'phone': service.customer.phone,
+            'location': f"{service.customer.address}, {service.customer.pin}",
+            'date': service.date_completed.strftime('%Y-%m-%d'),
+            'rating': service.rating if service.rating else 'Not Rated'
+        } for service in closed_services
+    ]
+    return jsonify(service_data), 200
+
+# Accept Service Route
+@app.route('/professional/accept-service', methods=['POST'])
+def accept_service():
+    service_id = request.json.get('service_id')
+    service = ServiceRequest.query.get(service_id)
+
+    if service:
+        service.service_status = 'accepted'
+        db.session.commit()
+        return jsonify({'message': 'Service accepted'}), 200
+    return jsonify({'error': 'Service not found'}), 404
+
+
+
+
+# Reject Service Route
+@app.route('/professional/reject-service', methods=['POST'])
+def reject_service():
+    service_id = request.json.get('service_id')
+    service = ServiceRequest.query.get(service_id)
+
+    if service:
+        db.session.delete(service)
+        db.session.commit()
+        return jsonify({'message': 'Service rejected and deleted'}), 200
+    return jsonify({'error': 'Service not found'}), 404
+
+@app.route('/service-history', methods=['GET'])
+def get_service_history():
+    # Get customer_id from query parameters
+    customer_id = request.args.get('customer_id')
+
+    if not customer_id:
+        return jsonify({'error': 'Customer ID is required'}), 400
+
+    # Fetch service history for the customer
+    service_requests = ServiceRequest.query.filter_by(customer_id=customer_id).all()
+
+    # Prepare the response data
+    service_history = []
+    for service_request in service_requests:
+        service_history.append({
+            'id': service_request.id,
+            'name': service_request.service.name,  # Assuming service has a name field
+            'professional': service_request.professional.name,  # Assuming a relationship to User (professional)
+            'phone': service_request.professional.mobile,  # Professional phone number
+            'status': service_request.service_status,  # Status of the service (Requested, Active, Accepted, Closed)
+        })
+
+    return jsonify(service_history), 200
+
+@app.route('/close-service/<int:service_id>', methods=['POST'])
+def close_service(service_id):
+    service_request = ServiceRequest.query.get(service_id)
+
+    if not service_request:
+        return jsonify({'error': 'Service not found'}), 404
+
+    # Mark the service as closed
+    service_request.status = 'Closed'
     db.session.commit()
-    
-    return jsonify({'message': 'Service booked successfully', 'professional': best_professional.name}), 200
+
+    return jsonify({'success': True}), 200

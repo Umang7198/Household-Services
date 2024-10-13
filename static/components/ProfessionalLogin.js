@@ -49,16 +49,26 @@ export default {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: this.username, password: this.password, role: this.role })
                 });
-
+    
                 if (response.ok) {
-                    window.location.href = '/';
-                } else {
                     const data = await response.json();
-                    this.error = data.msg || 'Login failed';
+                    // console.log(data)
+                    // console.log(data.user.id)
+                    // Assuming the response contains professional_id
+                    if (data.user.id) {
+                        localStorage.setItem('professional_id', data.user.id); // Store professional_id in localStorage
+                        this.$router.push('/professional/dashboard'); // Redirect to dashboard
+                    } else {
+                        this.error = 'Login failed: Missing professional ID';
+                    }
+                } else {
+                    const errorData = await response.json();
+                    this.error = errorData.msg || 'Login failed';
                 }
             } catch (err) {
                 this.error = 'An error occurred';
             }
         }
     }
+    
 };

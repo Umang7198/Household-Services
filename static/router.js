@@ -2,13 +2,14 @@
 import Home from "./components/Home.js";
 import CustomerLogin from "./components/CustomerLogin.js";
 import ProfessionalLogin from "./components/ProfessionalLogin.js";
-import AdminLogin from "./components/AdminLogin.js";  // Import AdminLogin
+import AdminLogin from "./components/AdminLogin.js";  
 import CustomerRegister from "./components/CustomerRegister.js";
 import ProfessionalRegister from "./components/ProfessionalRegister.js";
 import AdminDashboard from "./components/AdminDashboard.js";
 import AddService from "./components/AddService.js";
 import CustomerDashboard from "./components/CustomerDashboard.js";
-import CategoryServices from './components/CategoryServices.js';  // Import JS component
+import CategoryServices from './components/CategoryServices.js'; 
+import ProfessionalDashboard from "./components/ProfessionalDashboard.js";
 
 
 export default new VueRouter({
@@ -24,6 +25,7 @@ export default new VueRouter({
       { path: '/add-service', component: AddService },
       { path: '/customer/dashboard', component: CustomerDashboard},
       { path: '/services/:categoryId', component: CategoryServices },
+      { path: '/professional/dashboard', component: ProfessionalDashboard},
 
 
     ],
