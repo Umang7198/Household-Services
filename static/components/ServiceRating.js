@@ -71,7 +71,7 @@ export default {
     `,
     data() {
       return {
-        requestId:  this.$route.query.id,  // Example request ID
+        requestId: this.$route.query.id,
         serviceName: '',
         description: '',
         date: '',
@@ -83,13 +83,10 @@ export default {
       };
     },
     mounted() {
-        // Call fetchRatingData when the component is mounted
         this.fetchRatingData(this.requestId);
-      },
+    },
     methods: {
-      
       submitRemarks() {
-        // Handle form submission logic here
         const remarksData = {
           requestId: this.requestId,
           serviceName: this.serviceName,
@@ -99,7 +96,27 @@ export default {
           rating: this.rating,
           remarks: this.remarks
         };
-        alert('Remarks submitted successfully!');
+  
+        fetch('/submit-rating', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(remarksData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // alert('Remarks submitted successfully!');
+                this.closeService(); // Call close-service after successful submission
+            } else {
+                alert('Failed to submit remarks. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting remarks:', error);
+            alert('Error submitting remarks. Please try again.');
+        });
       },
       fetchRatingData(serviceRequestId) {
         fetch(`/rating/${serviceRequestId}`)
@@ -110,13 +127,10 @@ export default {
                 return response.json();
             })
             .then(ratingData => {
-                // Populate the component's data properties with the fetched data
-                console.log(ratingData)
                 const today = new Date();
-
                 this.serviceName = ratingData.service.name;
                 this.description = ratingData.service.description;
-                this.date = today.toISOString().split('T')[0]; // Extract the date part
+                this.date = today.toISOString().split('T')[0]; // Extract date
                 this.professionalId = ratingData.professional.id;
                 this.professionalName = ratingData.professional.name;
                 this.contact = ratingData.professional.phone;
@@ -128,13 +142,26 @@ export default {
                 alert('Failed to load rating data. Please try again later.');
             });
     },
+      closeService() {
+        fetch(`/close-service/${this.requestId}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Service closed successfully!');
+                this.$router.push('/customer/dashboard');
+            } else {
+                alert('Failed to close service. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error closing service:', error);
+            alert('Error closing service. Please try again.');
+        });
+      },
       closeForm() {
-        // Handle closing the form, such as navigating back or resetting
-        alert('Form closed without submitting.');
         this.$router.push('/customer/dashboard');
-
-        // You can also reset form data if needed
       }
     }
-  };
-  
+};

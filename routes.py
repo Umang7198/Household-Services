@@ -606,3 +606,35 @@ def get_rating_data(service_request_id):
     }
 
     return jsonify(response_data), 200
+
+@app.route('/submit-rating', methods=['POST'])
+def submit_rating():
+    data = request.json  # Get the JSON data from the request
+
+    # Extract required fields
+    service_request_id = data.get('requestId')
+    rating_value = data.get('rating')
+    review_text = data.get('remarks')
+
+    # Check if the service request exists
+    service_request = ServiceRequest.query.get(service_request_id)
+    if not service_request:
+        return jsonify({'error': 'Service request not found'}), 404
+
+    # Create a new Rating object and save it to the database
+    new_rating = Rating(
+        service_request_id=service_request_id,
+        rating=rating_value,
+        review=review_text,
+        date_created=datetime.utcnow()
+    )
+
+    db.session.add(new_rating)
+
+    # Optionally, update the service status if needed
+    service_request.service_status = 'closed'  # Mark service as closed
+    service_request.completion_date = datetime.utcnow()  # Set the completion date
+
+    db.session.commit()  # Commit the transaction
+
+    return jsonify({'success': True}), 200
