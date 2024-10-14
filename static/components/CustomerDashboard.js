@@ -93,11 +93,11 @@ export default {
                                         <td>{{ service.professional }}</td>
                                         <td>{{ service.phone }}</td>
                                         <td>
-                                            <span v-if="service.status === 'Closed'">Closed</span>
-                                            <span v-if="service.status === 'Requested'">Requested</span>
-                                            
+                                            <span v-if="service.status === 'closed'">Closed</span>
+                                            <span v-if="service.status === 'requested'">Requested</span>
+                                            <span v-if="service.status === 'rejected'">Rejected</span>
                                             <!-- Show "Close it?" for accepted services -->
-                                            <a v-if="service.status === 'Accepted'" href="#" @click.prevent="closeService(service.id)">Close it?</a>
+                                            <a v-if="service.status === 'accepted'" href="#" @click.prevent="closeService(service.id)">Close it?</a>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -177,7 +177,7 @@ export default {
             .then(data => {
                 if (data.success) {
                     // Update the service object to show it as "Requested" instead of "Book Now"
-                    service.status = 'Requested';  // Assuming each service now has a 'status' field
+                    service.status = 'requested';  // Assuming each service now has a 'status' field
                     
                     // Add the booked service to the service history
                     this.serviceHistory.push({
@@ -185,7 +185,7 @@ export default {
                         name: service.name,
                         professional: data.professional,  // Name of the professional from the backend
                         phone: '1234567890',  // Placeholder for professional's phone (fetch the actual value from the backend if available)
-                        status: 'Requested'
+                        status: 'requested'
                     });
                     
                     alert("Service booked successfully!");
@@ -221,7 +221,7 @@ export default {
                     if (data.success) {
                         // Update the service status in the UI
                         this.serviceHistory = this.serviceHistory.map(service =>
-                            service.id === serviceId ? { ...service, status: 'Closed' } : service
+                            service.id === serviceId ? { ...service, status: 'closed' } : service
                         );
                     } else {
                         alert('Failed to close the service.');

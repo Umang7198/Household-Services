@@ -519,7 +519,7 @@ def reject_service():
     service = ServiceRequest.query.get(service_id)
 
     if service:
-        db.session.delete(service)
+        service.service_status = 'rejected'
         db.session.commit()
         return jsonify({'message': 'Service rejected and deleted'}), 200
     return jsonify({'error': 'Service not found'}), 404
