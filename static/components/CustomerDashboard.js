@@ -201,7 +201,6 @@ export default {
         
         fetchServiceHistory() {
             const customer_id = localStorage.getItem('customer_id');  // Retrieve the customer ID
-            console.log(customer_id)
             // Fetch service history from the backend
             fetch(`/service-history?customer_id=${customer_id}`)
                 .then(response => response.json())
@@ -215,21 +214,10 @@ export default {
         },
         closeService(serviceId) {
             // Close the service (send request to backend to mark it as closed)
-            fetch(`/close-service/${serviceId}`, { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update the service status in the UI
-                        this.serviceHistory = this.serviceHistory.map(service =>
-                            service.id === serviceId ? { ...service, status: 'closed' } : service
-                        );
-                    } else {
-                        alert('Failed to close the service.');
-                    }
-                })
-                .catch(error => {
-                    console.error("Error closing service:", error);
-                });
-        }
+            this.$router.push({
+                path: '/rating',
+                query: { id: serviceId } // Passing serviceId as a query parameter
+            });
     }
     }
+}

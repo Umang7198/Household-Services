@@ -107,7 +107,7 @@ export default {
             fetch(`/professional/closed-services?professional_id=${professional_id}`)
                 .then(response => response.json())
                 .then(data => {
-                    this.closedServices = data;
+                    this.closedServices = data.sort((a, b) => new Date(b.date) - new Date(a.date));
                 })
                 .catch(error => {
                     console.error('Error fetching closed services:', error);

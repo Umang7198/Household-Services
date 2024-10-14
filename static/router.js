@@ -10,7 +10,7 @@ import AddService from "./components/AddService.js";
 import CustomerDashboard from "./components/CustomerDashboard.js";
 import CategoryServices from './components/CategoryServices.js'; 
 import ProfessionalDashboard from "./components/ProfessionalDashboard.js";
-
+import ServiceRating from "./components/ServiceRating.js";
 
 export default new VueRouter({
     mode: 'history',
@@ -26,7 +26,7 @@ export default new VueRouter({
       { path: '/customer/dashboard', component: CustomerDashboard},
       { path: '/services/:categoryId', component: CategoryServices },
       { path: '/professional/dashboard', component: ProfessionalDashboard},
-
+      { path: '/rating', component: ServiceRating},
 
     ],
 });

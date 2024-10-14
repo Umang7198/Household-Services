@@ -2,7 +2,7 @@ from models import db, User,Service,ServiceRequest,ServiceCategory,Rating,profes
 from werkzeug.security import check_password_hash, generate_password_hash
 from config import app,db
 from flask import Flask, request, redirect, render_template, url_for, session,abort,flash,jsonify
-import datetime
+from datetime import datetime,date
 
 @app.route('/')
 def index():
@@ -455,7 +455,7 @@ def get_today_services():
     today_services = ServiceRequest.query.filter(
     ServiceRequest.professional_id == professional_id,
     ServiceRequest.service_status == 'requested',
-    func.date(ServiceRequest.date_of_request) == datetime.date.today()
+    func.date(ServiceRequest.date_of_request) == date.today()
     ).all()
     # print(today_services)
     service_data = [
@@ -533,7 +533,7 @@ def get_service_history():
         return jsonify({'error': 'Customer ID is required'}), 400
 
     # Fetch service history for the customer
-    service_requests = ServiceRequest.query.filter_by(customer_id=customer_id).all()
+    service_requests = ServiceRequest.query.filter_by(customer_id=customer_id).order_by(ServiceRequest.date_of_request.desc()) .all()
 
     # Prepare the response data
     service_history = []
@@ -556,7 +556,53 @@ def close_service(service_id):
         return jsonify({'error': 'Service not found'}), 404
 
     # Mark the service as closed
-    service_request.status = 'Closed'
-    db.session.commit()
+    if service_request.service_status != 'closed':
+        service_request.service_status = 'closed'
+        service_request.completion_date = datetime.utcnow()  # Set the current date and time
+        db.session.commit()
 
     return jsonify({'success': True}), 200
+
+@app.route('/rating/<int:service_request_id>', methods=['GET'])
+def get_rating_data(service_request_id):
+    # Query the service request by its ID
+    service_request = ServiceRequest.query.get(service_request_id)
+
+    if not service_request:
+        return jsonify({'error': 'Service request not found'}), 404
+
+    # Fetch related customer and professional details
+    customer = User.query.get(service_request.customer_id)
+    professional = User.query.get(service_request.professional_id)
+    service = Service.query.get(service_request.service_id)
+
+    # Fetch existing rating for the service request
+    rating = Rating.query.filter_by(service_request_id=service_request.id).first()
+
+    # Prepare the response data
+    response_data = {
+        'service_request_id': service_request.id,
+        'customer': {
+            'id': customer.id,
+            'name': customer.name,
+            'phone': customer.mobile,
+        },
+        'professional': {
+            'id': professional.id,
+            'name': professional.name,
+            'phone': professional.mobile,
+            'rating': professional.rating,
+        },
+        'service': {
+            'id': service.id,
+            'name': service.name,
+            'description': service.description,
+        },
+        'rating': {
+            'id': rating.id if rating else None,
+            'score': rating.rating if rating else None,
+            'review': rating.review if rating else None,
+        }
+    }
+
+    return jsonify(response_data), 200
