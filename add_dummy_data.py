@@ -1,5 +1,5 @@
 from app import app  # Import your app from wherever it is defined
-from models import db, ServiceCategory, Service, User, ServiceRequest, Rating
+from models import db, ServiceCategory, Service, User, ServiceRequest
 from datetime import datetime
 
 with app.app_context():

@@ -36,7 +36,6 @@ export default {
                 <table class="table table-hover shadow-sm rounded">
                     <thead class="thead-dark">
                         <tr>
-                            <th>ID</th>
                             <th>Customer Name</th>
                             <th>Contact Phone</th>
                             <th>Location (with pin code)</th>
@@ -45,7 +44,6 @@ export default {
                     </thead>
                     <tbody>
                         <tr v-for="(service, index) in todayServices" :key="index">
-                            <td>{{ service.id }}</td>
                             <td>{{ service.customerName }}</td>
                             <td>{{ service.phone }}</td>
                             <td>{{ service.location }}</td>
@@ -64,7 +62,6 @@ export default {
                 <table class="table table-hover shadow-sm rounded">
                     <thead class="thead-dark">
                         <tr>
-                            <th>ID</th>
                             <th>Customer Name</th>
                             <th>Contact Phone</th>
                             <th>Location (with pin code)</th>
@@ -74,12 +71,11 @@ export default {
                     </thead>
                     <tbody>
                         <tr v-for="(service, index) in closedServices" :key="index">
-                            <td>{{ service.id }}</td>
                             <td>{{ service.customerName }}</td>
                             <td>{{ service.phone }}</td>
                             <td>{{ service.location }}</td>
                             <td>{{ service.date }}</td>
-                            <td>{{ service.rating }}</td>
+                            <td>{{ service.rating.rating }}</td>
                         </tr>
                     </tbody>
                 </table>

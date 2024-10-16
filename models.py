@@ -67,22 +67,13 @@ class ServiceRequest(db.Model):
     date_of_request = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     date_of_completion = db.Column(db.DateTime, nullable=True)
     service_status = db.Column(db.String(50), nullable=False, default='requested')
-    remarks = db.Column(db.String(500), nullable=True)
     price = db.Column(db.Float, nullable=False)
-    
+    rating = db.Column(db.Float, nullable=True)
+    review = db.Column(db.Text, nullable=True)
+
     # Relationships
     service = db.relationship('Service', back_populates='service_requests')
     customer = db.relationship('User', foreign_keys=[customer_id], back_populates='customer_requests')
     professional = db.relationship('User', foreign_keys=[professional_id], back_populates='professional_requests')
 
 
-# Rating model (for rating completed service requests)
-class Rating(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    service_request_id = db.Column(db.Integer, db.ForeignKey('service_request.id'), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)
-    review = db.Column(db.String(500), nullable=True)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-
-    # Relationship
-    service_request = db.relationship('ServiceRequest', backref=db.backref('rating', uselist=False))

@@ -40,16 +40,16 @@ export default {
                       <div class="mb-3">
                           <label class="form-label">Service Rating:</label>
                           <div class="rating">
-                              <input type="radio" id="star5" v-model="rating" value="5" />
-                              <label for="star5" title="5 stars" class="star">☆</label>
-                              <input type="radio" id="star4" v-model="rating" value="4" />
-                              <label for="star4" title="4 stars" class="star">☆</label>
-                              <input type="radio" id="star3" v-model="rating" value="3" />
-                              <label for="star3" title="3 stars" class="star">☆</label>
-                              <input type="radio" id="star2" v-model="rating" value="2" />
-                              <label for="star2" title="2 stars" class="star">☆</label>
                               <input type="radio" id="star1" v-model="rating" value="1" />
                               <label for="star1" title="1 star" class="star">☆</label>
+                              <input type="radio" id="star2" v-model="rating" value="2" />
+                              <label for="star2" title="2 stars" class="star">☆</label>
+                              <input type="radio" id="star3" v-model="rating" value="3" />
+                              <label for="star3" title="3 stars" class="star">☆</label>
+                              <input type="radio" id="star4" v-model="rating" value="4" />
+                              <label for="star4" title="4 stars" class="star">☆</label>
+                              <input type="radio" id="star5" v-model="rating" value="5" />
+                              <label for="star1" title="5 stars" class="star">☆</label>
                           </div>
                       </div>
   

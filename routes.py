@@ -1,8 +1,9 @@
-from models import db, User,Service,ServiceRequest,ServiceCategory,Rating,professional_services
+from models import db, User,Service,ServiceRequest,ServiceCategory,professional_services
 from werkzeug.security import check_password_hash, generate_password_hash
 from config import app,db
 from flask import Flask, request, redirect, render_template, url_for, session,abort,flash,jsonify
 from datetime import datetime,date
+from sqlalchemy import func
 
 @app.route('/')
 def index():
@@ -404,13 +405,14 @@ def book_service():
     
     # Fetch customer information
     customer = User.query.get(customer_id)
-    
+    service = Service.query.get(service_id)
+
     if not customer or customer.role != 'customer':
         return jsonify({'success': False, 'message': 'Invalid customer'}), 400
     
     # Find the best professional based on the logic provided
     best_professional = find_best_professional(service_id, customer.pin)
-    
+    print(best_professional)
     if not best_professional:
         return jsonify({'success': False, 'message': 'No professionals available'}), 400
     
@@ -420,7 +422,8 @@ def book_service():
             service_id=service_id,
             customer_id=customer.id,
             professional_id=best_professional.id,
-            price=100  # Example price, you can replace this with actual pricing logic
+            price=service.base_price,
+            date_of_request=datetime.now()  # Example price, you can replace this with actual pricing logic
         )
         
         # Update professional's workload
@@ -436,7 +439,6 @@ def book_service():
         db.session.rollback()  # Roll back changes in case of an error
         return jsonify({'success': False, 'message': str(e)}), 500
 
-from sqlalchemy import func
 
 @app.route('/professional/today-services', methods=['GET'])
 def get_today_services():
@@ -480,22 +482,29 @@ def get_closed_services():
     if not professional:
         return jsonify({'msg': 'Unauthorized or professional not found'}), 403
 
+    # Fetch closed services for the professional
     closed_services = ServiceRequest.query.filter_by(
         professional_id=professional_id,
         service_status='closed'
     ).all()
 
-    service_data = [
-        {
+    # Prepare the data to return
+    service_data = []
+    for service in closed_services:
+        service_data.append({
             'id': service.id,
             'customerName': service.customer.name,
-            'phone': service.customer.phone,
+            'phone': service.customer.mobile,
             'location': f"{service.customer.address}, {service.customer.pin}",
-            'date': service.date_completed.strftime('%Y-%m-%d'),
-            'rating': service.rating if service.rating else 'Not Rated'
-        } for service in closed_services
-    ]
+            'date': service.date_of_completion.strftime('%Y-%m-%d') if service.date_of_completion else 'Not Completed',
+            'rating': {
+                'score': service.rating,
+                'review': service.review
+            } if service.rating is not None else 'Not Rated'
+        })
+
     return jsonify(service_data), 200
+
 
 # Accept Service Route
 @app.route('/professional/accept-service', methods=['POST'])
@@ -520,7 +529,11 @@ def reject_service():
 
     if service:
         service.service_status = 'rejected'
-        db.session.commit()
+        professional = User.query.get(service.professional_id)
+        if professional and professional.workload > 0:
+            professional.workload -= 1
+
+        db.session.commit()        
         return jsonify({'message': 'Service rejected and deleted'}), 200
     return jsonify({'error': 'Service not found'}), 404
 
@@ -555,10 +568,16 @@ def close_service(service_id):
     if not service_request:
         return jsonify({'error': 'Service not found'}), 404
 
+    print(service_request)
     # Mark the service as closed
     if service_request.service_status != 'closed':
         service_request.service_status = 'closed'
-        service_request.completion_date = datetime.utcnow()  # Set the current date and time
+        service_request.date_of_completion = datetime.now()  # Set the current date and time
+
+        professional = User.query.get(service_request.professional_id)
+        if professional and professional.workload > 0:
+            professional.workload -= 1
+
         db.session.commit()
 
     return jsonify({'success': True}), 200
@@ -575,9 +594,6 @@ def get_rating_data(service_request_id):
     customer = User.query.get(service_request.customer_id)
     professional = User.query.get(service_request.professional_id)
     service = Service.query.get(service_request.service_id)
-
-    # Fetch existing rating for the service request
-    rating = Rating.query.filter_by(service_request_id=service_request.id).first()
 
     # Prepare the response data
     response_data = {
@@ -599,9 +615,8 @@ def get_rating_data(service_request_id):
             'description': service.description,
         },
         'rating': {
-            'id': rating.id if rating else None,
-            'score': rating.rating if rating else None,
-            'review': rating.review if rating else None,
+            'score': service_request.rating,
+            'review': service_request.review,
         }
     }
 
@@ -621,19 +636,28 @@ def submit_rating():
     if not service_request:
         return jsonify({'error': 'Service request not found'}), 404
 
-    # Create a new Rating object and save it to the database
-    new_rating = Rating(
-        service_request_id=service_request_id,
-        rating=rating_value,
-        review=review_text,
-        date_created=datetime.utcnow()
-    )
+    # Update rating and review in the service request
+    service_request.rating = rating_value
+    service_request.review = review_text
+    service_request.service_status = 'closed'
+    service_request.date_of_completion = datetime.now()
 
-    db.session.add(new_rating)
+    # Update the professional's average rating
+    professional = User.query.get(service_request.professional_id)
+    if professional:
+        # Calculate the new average rating for the professional
+        total_ratings = db.session.query(func.count(ServiceRequest.rating)).filter(
+            ServiceRequest.professional_id == professional.id,
+            ServiceRequest.rating.isnot(None)  # Only count completed services with a rating
+        ).scalar()
 
-    # Optionally, update the service status if needed
-    service_request.service_status = 'closed'  # Mark service as closed
-    service_request.completion_date = datetime.utcnow()  # Set the completion date
+        avg_rating = db.session.query(func.avg(ServiceRequest.rating)).filter(
+            ServiceRequest.professional_id == professional.id,
+            ServiceRequest.rating.isnot(None)
+        ).scalar()
+
+        # Update the professional's rating
+        professional.rating = avg_rating
 
     db.session.commit()  # Commit the transaction
 

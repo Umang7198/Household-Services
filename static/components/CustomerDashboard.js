@@ -79,7 +79,6 @@ export default {
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
                                         <th>Service Name</th>
                                         <th>Professional Name</th>
                                         <th>Phone No.</th>
@@ -88,7 +87,6 @@ export default {
                                 </thead>
                                 <tbody>
                                     <tr v-for="(service, index) in serviceHistory" :key="index">
-                                        <td>{{ service.id }}</td>
                                         <td>{{ service.name }}</td>
                                         <td>{{ service.professional }}</td>
                                         <td>{{ service.phone }}</td>
