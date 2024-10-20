@@ -67,6 +67,7 @@ export default {
                             <th>Location (with pin code)</th>
                             <th>Date</th>
                             <th>Rating</th>
+                            <th>Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -75,7 +76,8 @@ export default {
                             <td>{{ service.phone }}</td>
                             <td>{{ service.location }}</td>
                             <td>{{ service.date }}</td>
-                            <td>{{ service.rating.rating }}</td>
+                            <td>{{ service.rating.score }}</td>
+                            <td>{{ service.rating.review}}</td>
                         </tr>
                     </tbody>
                 </table>

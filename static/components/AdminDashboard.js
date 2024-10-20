@@ -410,6 +410,7 @@ export default {
             <th>Request ID</th>
             <th>Customer Name</th>
             <th>Service</th>
+            <th>Professional</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -418,7 +419,8 @@ export default {
             <td>{{ request.id }}</td>
             <td>{{ request.customer_name }}</td>
             <td>{{ request.service_name }}</td>
-            <td>{{ request.status }}</td>
+            <td> {{ request.professional_name }} </td>
+            <td>{{ request.service_status }}</td>
           </tr>
         </tbody>
       </table>

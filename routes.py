@@ -261,6 +261,30 @@ def reject_professional(professional_id):
         db.session.rollback()
         return jsonify({'msg': f'Error occurred: {str(e)}', 'status': 'fail'}), 500
 
+@app.route('/service-requests', methods=['GET'])
+def get_service_requests():
+    # Query all service requests
+    service_requests = ServiceRequest.query.filter(ServiceRequest.service_status != 'rejected').all()
+
+    # Convert each service request to a dictionary with necessary details
+    request_list = []
+    for request in service_requests:
+        request_data = {
+            'id': request.id,
+            'service_name': request.service.name,  # Service name
+            'customer_name': request.customer.name,  # Customer's name
+            'professional_name': request.professional.name if request.professional else 'Not assigned',  # Professional's name if assigned
+            'service_status': request.service_status,  # Status of the request
+            'date_of_request': request.date_of_request,
+            'date_of_completion': request.date_of_completion,
+            'price': request.price,
+            'rating': request.rating,
+            'review': request.review
+        }
+        request_list.append(request_data)
+    print(request_data)
+    # Return the list of service requests as a JSON response
+    return jsonify(request_list), 200
 
 @app.route('/register/customer', methods=['POST'])
 def register_customer():
@@ -492,7 +516,7 @@ def get_closed_services():
     service_data = []
     for service in closed_services:
         service_data.append({
-            'id': service.id,
+            
             'customerName': service.customer.name,
             'phone': service.customer.mobile,
             'location': f"{service.customer.address}, {service.customer.pin}",
@@ -502,7 +526,7 @@ def get_closed_services():
                 'review': service.review
             } if service.rating is not None else 'Not Rated'
         })
-
+    
     return jsonify(service_data), 200
 
 
