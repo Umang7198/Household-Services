@@ -234,7 +234,7 @@ def get_unverified_professionals():
 @app.route('/professional/<int:professional_id>', methods=['GET'])
 def get_professional(professional_id):
     # Fetch the professional by ID, ensuring they are unverified
-    professional = User.query.filter_by(id=professional_id, role='professional', verified=False).first()
+    professional = User.query.filter_by(id=professional_id, role='professional').first()
     
     if not professional:
         return jsonify({'msg': 'Professional not found or already verified'}), 404
@@ -254,7 +254,6 @@ def get_professional(professional_id):
         'workload': professional.workload,
         'date_created': professional.date_created
     }
-
     return jsonify(professional_data), 200
 
 

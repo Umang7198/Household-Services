@@ -23,8 +23,9 @@ export default {
                                 <a class="nav-link" href="#" @click.prevent="logout">Logout</a>
                             </li>
                             <li class="nav-item">
-                                <router-link class="nav-link" to="/profile">Profile</router-link>
+                                <router-link class="nav-link" to="/professional/profile">Profile</router-link>
                             </li>
+
                         </ul>
                     </div>
                 </div>

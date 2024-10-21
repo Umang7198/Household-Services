@@ -11,6 +11,7 @@ import CustomerDashboard from "./components/CustomerDashboard.js";
 import CategoryServices from './components/CategoryServices.js'; 
 import ProfessionalDashboard from "./components/ProfessionalDashboard.js";
 import ServiceRating from "./components/ServiceRating.js";
+import ProfessionalProfile from "./components/ProfessionalProfile.js";
 
 import CustomerProfile from "./components/CustomerProfile.js";
 export default new VueRouter({
@@ -29,5 +30,6 @@ export default new VueRouter({
       { path: '/professional/dashboard', component: ProfessionalDashboard},
       { path: '/rating', component: ServiceRating},
       { path: '/customer/profile', component: CustomerProfile},
+      { path: '/professional/profile', component: ProfessionalProfile},
     ],
 });
