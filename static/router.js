@@ -12,6 +12,7 @@ import CategoryServices from './components/CategoryServices.js';
 import ProfessionalDashboard from "./components/ProfessionalDashboard.js";
 import ServiceRating from "./components/ServiceRating.js";
 
+import CustomerProfile from "./components/CustomerProfile.js";
 export default new VueRouter({
     mode: 'history',
     routes: [
@@ -27,6 +28,6 @@ export default new VueRouter({
       { path: '/services/:categoryId', component: CategoryServices },
       { path: '/professional/dashboard', component: ProfessionalDashboard},
       { path: '/rating', component: ServiceRating},
-
+      { path: '/customer/profile', component: CustomerProfile},
     ],
 });

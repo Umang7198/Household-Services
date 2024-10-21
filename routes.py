@@ -230,7 +230,7 @@ def get_unverified_professionals():
     ]
     # print(jsonify(professionals_list))
     return jsonify(professionals_list), 200
-    
+
 @app.route('/professional/<int:professional_id>', methods=['GET'])
 def get_professional(professional_id):
     # Fetch the professional by ID, ensuring they are unverified
@@ -712,3 +712,27 @@ def submit_rating():
     db.session.commit()  # Commit the transaction
 
     return jsonify({'success': True}), 200
+
+
+@app.route('/customer/<int:customer_id>', methods=['GET'])
+def get_customer(customer_id):
+    # Fetch the customer by ID
+    customer = User.query.filter_by(id=customer_id, role='customer').first()
+
+    if not customer:
+        return jsonify({'msg': 'Customer not found'}), 404
+
+    # Prepare the customer's details
+    customer_data = {
+        'id': customer.id,
+        'username':customer.username,
+        'password':customer.password,
+        'name': customer.name,
+        'email': customer.email,
+        'mobile': customer.mobile,
+        'address': customer.address,
+        'pin': customer.pin,
+        'date_created': customer.date_created.strftime('%Y-%m-%d %H:%M:%S')  # Format date as needed
+    }
+
+    return jsonify(customer_data), 200
