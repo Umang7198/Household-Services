@@ -228,8 +228,35 @@ def get_unverified_professionals():
             'pin': professional.pin
         } for professional in unverified_professionals
     ]
-    print(jsonify(professionals_list))
+    # print(jsonify(professionals_list))
     return jsonify(professionals_list), 200
+    
+@app.route('/professional/<int:professional_id>', methods=['GET'])
+def get_professional(professional_id):
+    # Fetch the professional by ID, ensuring they are unverified
+    professional = User.query.filter_by(id=professional_id, role='professional', verified=False).first()
+    
+    if not professional:
+        return jsonify({'msg': 'Professional not found or already verified'}), 404
+
+    # Prepare the professional's details
+    professional_data = {
+        'id': professional.id,
+        'name': professional.name,
+        'email': professional.email,
+        'mobile': professional.mobile,
+        'address': professional.address,
+        'pin': professional.pin,
+        'experience': professional.experience,
+        'description': professional.description,
+        'services': [{'id': service.id, 'name': service.name} for service in professional.professional_services],  # List of services
+        'rating': professional.rating,
+        'workload': professional.workload,
+        'date_created': professional.date_created
+    }
+
+    return jsonify(professional_data), 200
+
 
 @app.route('/professional/approve/<int:professional_id>', methods=['PUT'])
 def approve_professional(professional_id):
@@ -282,7 +309,6 @@ def get_service_requests():
             'review': request.review
         }
         request_list.append(request_data)
-    print(request_data)
     # Return the list of service requests as a JSON response
     return jsonify(request_list), 200
 

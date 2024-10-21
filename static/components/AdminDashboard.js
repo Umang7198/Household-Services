@@ -21,8 +21,8 @@ export default {
       },
       successMessage: '',
       error: '',
-      showCategoryForm: false  // To toggle add category form modal
-
+      showCategoryForm: false,  // To toggle add category form modal
+      selectedProfessional: null,
     };
   },
   created() {
@@ -235,6 +235,28 @@ export default {
         }
       }
     },
+    async fetchProfessionalDetails(id) {
+      try {
+        const response = await fetch(`/professional/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch professional details');
+        }
+        const data = await response.json();
+        this.selectedProfessional = data;
+      } catch (error) {
+        this.error = error.message;
+      }
+    },
+    showProfessionalDetail(id) {
+      this.fetchProfessionalDetails(id);
+
+    },
+
+    closeProfessionalDetail() {
+      this.selectedProfessional = null;
+    },
+
+
     async approveProfessional(id) {
       if (confirm('Are you sure you want to approve this professional?')) {
         try {
@@ -389,7 +411,7 @@ export default {
         </thead>
         <tbody>
           <tr v-for="professional in professionals" :key="professional.id">
-            <td>{{ professional.id }}</td>
+            <td @click="showProfessionalDetail(professional.id)" style="cursor: pointer;">{{ professional.id }}</td>
             <td>{{ professional.name }}</td>
             <td>{{ professional.services[0].name }}</td>
             <td>
@@ -400,6 +422,22 @@ export default {
         </tbody>
       </table>
     </section>
+
+    <!-- Professional Detail Component -->
+    <div v-if="selectedProfessional" class="professional-detail">
+      <h5>Professional Details</h5>
+      <p><strong>Name:</strong> {{ selectedProfessional.name }}</p>
+      <p><strong>Email:</strong> {{ selectedProfessional.email }}</p>
+      <p><strong>Phone:</strong> {{ selectedProfessional.mobile }}</p>
+      <p><strong>Address:</strong> {{ selectedProfessional.address }}</p>
+      <p><strong>PIN:</strong> {{ selectedProfessional.pin }}</p>
+      <p><strong>Experience:</strong> {{ selectedProfessional.experience }}</p>
+      <p><strong>Description:</strong> {{ selectedProfessional.description }}</p>
+      <p><strong>Services:</strong> {{ selectedProfessional.services.map(service => service.name).join(', ') }}</p>
+      
+      <p><strong>Date Created:</strong> {{ selectedProfessional.date_created }}</p>
+      <button class="btn btn-secondary" @click="closeProfessionalDetail">Close</button>
+    </div>
 
     <!-- Service Requests Section -->
     <section class="mb-5">
