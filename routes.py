@@ -835,3 +835,40 @@ def delete_user(id):
         db.session.commit()
         return jsonify({'msg': 'User deleted successfully'}), 200
     return jsonify({'msg': 'User not found'}), 404
+
+@app.route('/customer/<int:id>', methods=['PUT'])
+def update_customer(id):
+    data = request.json  # Get the updated customer details from the request body
+    
+    # Find the customer by id
+    customer = User.query.filter_by(id=id, role='customer').first()
+    
+    if not customer:
+        return jsonify({'msg': 'Customer not found'}), 404
+
+    # Update customer details based on the incoming data
+    customer.username = data.get('username', customer.username)
+    customer.password = data.get('password', customer.password)
+    customer.name = data.get('name', customer.name)
+    customer.email = data.get('email', customer.email)
+    customer.mobile = data.get('mobile', customer.mobile)
+    customer.address = data.get('address', customer.address)
+    customer.pin = data.get('pin', customer.pin)
+
+    try:
+        # Commit changes to the database
+        db.session.commit()
+        return jsonify({
+            'id': customer.id,
+            'username': customer.username,
+            'password': customer.password,  # Send the updated data back
+            'name': customer.name,
+            'email': customer.email,
+            'mobile': customer.mobile,
+            'address': customer.address,
+            'pin': customer.pin,
+            'date_created': customer.date_created
+        }), 200
+    except Exception as e:
+        db.session.rollback()  # Rollback in case of an error
+        return jsonify({'msg': 'Failed to update customer details', 'error': str(e)}), 500
