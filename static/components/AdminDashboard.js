@@ -309,7 +309,7 @@ export default {
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-              <router-link to="/search" class="nav-link">Search</router-link>
+              <router-link to="/admin/search" class="nav-link">Search</router-link>
           </li>
           <li class="nav-item"><a class="nav-link" href="#">Summary</a></li>
           <li class="nav-item">

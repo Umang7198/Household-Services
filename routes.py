@@ -872,3 +872,56 @@ def update_customer(id):
     except Exception as e:
         db.session.rollback()  # Rollback in case of an error
         return jsonify({'msg': 'Failed to update customer details', 'error': str(e)}), 500
+
+@app.route('/search/services', methods=['GET'])
+def search_services():
+    search_query = request.args.get('name', '').strip()  # Get the search query
+    customer_id = request.args.get('customer_id')  # Get customer ID from query parameters
+
+    if not search_query:
+        return jsonify({'msg': 'Please provide a search query.'}), 400
+
+    # Fetch services matching the query (by service name or category name)
+    services = Service.query.join(ServiceCategory).filter(
+        (Service.name.ilike(f'%{search_query}%')) |
+        (ServiceCategory.name.ilike(f'%{search_query}%'))
+    ).all()
+
+    if not services:
+        return jsonify({'msg': 'No services found.'}), 404
+
+    service_list = []
+    
+    for service in services:
+        # Calculate the average rating for each service from ServiceRequest
+        avg_rating = db.session.query(func.avg(ServiceRequest.rating)).filter_by(service_id=service.id).scalar()
+        
+        # Get the professionals who provide the service
+        professionals = service.professionals
+        
+        # Create a list of professional names
+        professional_names = [prof.name for prof in professionals]
+
+        latest_request = (
+            ServiceRequest.query
+            .filter_by(service_id=service.id, customer_id=customer_id)
+            .order_by(ServiceRequest.date_of_request.desc())  # Assuming request_date is the field for the date of the request
+            .first()
+        )
+        
+        service_status = latest_request.service_status if latest_request else 'Not Requested'  # Default if no request
+
+        # Append the service details with the calculated fields
+        service_list.append({
+            'id': service.id,
+            'name': service.name,
+            'description': service.description,
+            'base_price': service.base_price,
+            'category': service.category.name,
+            'time_required': service.time_required,
+            'rating': avg_rating if avg_rating else 'No Ratings',  # If no ratings, return "No Ratings"
+            'professionals': professional_names,
+            'status':service_status
+        })
+
+    return jsonify(service_list), 200

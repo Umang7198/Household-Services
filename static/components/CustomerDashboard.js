@@ -14,7 +14,7 @@ export default {
                                 <router-link class="nav-link" to="/home">Home</router-link>
                             </li>
                             <li class="nav-item">
-                                <router-link class="nav-link" to="/search">Search</router-link>
+                                <router-link class="nav-link" to="/customer/search">Search</router-link>
                             </li>
                             <li class="nav-item">
                                 <router-link class="nav-link" to="/summary">Summary</router-link>
