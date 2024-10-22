@@ -14,6 +14,8 @@ import ServiceRating from "./components/ServiceRating.js";
 import ProfessionalProfile from "./components/ProfessionalProfile.js";
 
 import CustomerProfile from "./components/CustomerProfile.js";
+import Search from "./components/Search.js";
+
 export default new VueRouter({
     mode: 'history',
     routes: [
@@ -31,5 +33,6 @@ export default new VueRouter({
       { path: '/rating', component: ServiceRating},
       { path: '/customer/profile', component: CustomerProfile},
       { path: '/professional/profile', component: ProfessionalProfile},
+      { path: '/search', component: Search},
     ],
 });

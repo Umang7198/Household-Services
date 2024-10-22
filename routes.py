@@ -735,3 +735,103 @@ def get_customer(customer_id):
     }
 
     return jsonify(customer_data), 200
+
+# Flask backend routes (example)
+
+# Combined route to search for customers or professionals based on role
+@app.route('/search/users', methods=['GET'])
+def search_users():
+    role = request.args.get('role')
+    query = request.args.get('name')
+    
+    # Validate role and query
+    if not role or role not in ['customer', 'professional']:
+        return jsonify({'msg': 'Invalid or missing role'}), 400
+    
+    if not query:
+        return jsonify({'msg': 'No search query provided'}), 400
+    
+    # Perform search based on the role
+    users = User.query.filter(User.role == role, User.name.ilike(f"%{query}%")).all()
+    
+    if users:
+        if role == 'customer':
+            # Return customer-specific data
+            user_data = [
+                {
+                    'id': user.id,
+                    'name': user.name,
+                    'email': user.email,
+                    'mobile': user.mobile,
+                    'username':user.username,
+                    'password':user.password,
+                    'address':user.address,
+                    'pin':user.pin,
+                    'date_created':user.date_created,
+
+                }
+                for user in users
+            ]
+        elif role == 'professional':
+            # Return professional-specific data including services, rating, and workload
+            user_data = [
+                {
+                    'id': user.id,
+                    'name': user.name,
+                    'email': user.email,
+                    'mobile': user.mobile,
+                    'username':user.username,
+                    'password':user.password,
+                    'services': [{'id': service.id, 'name': service.name} for service in user.professional_services],
+                    'rating': user.rating,
+                    'workload': user.workload,
+                    'address':user.address,
+                    'pin':user.pin,
+                    'date_created':user.date_created,
+                }
+                for user in users
+            ]
+        return jsonify(user_data), 200
+    else:
+        return jsonify({'msg': f'No {role}s found'}), 404
+
+@app.route('/search/service-requests', methods=['GET'])
+def search_service_requests():
+    query = request.args.get('request')
+    if not query:
+        return jsonify({'msg': 'No search query provided'}), 400
+    
+    service_requests = ServiceRequest.query.join(Service).filter(
+        Service.name.ilike(f"%{query}%")
+    ).all()
+    
+    if service_requests:
+        request_data = [
+            {
+                'id': req.id,
+                'service_name': req.service.name,
+                'customer_name': req.customer.name,
+                'professional_name': req.professional.name if req.professional else 'Not assigned',
+                'status': req.service_status,
+                'price': req.price,
+                'date_of_request': req.date_of_request.strftime('%Y-%m-%d'),
+                'date_of_completion': req.date_of_completion.strftime('%Y-%m-%d') if req.date_of_completion else None,
+                'rating':req.rating,
+                'review':req.review,
+            }
+            for req in service_requests
+        ]
+        return jsonify(request_data), 200
+    else:
+        return jsonify({'msg': 'No service requests found'}), 404
+
+@app.route('/delete/user/<int:id>', methods=['DELETE'])
+def delete_user(id):
+    # Logic to delete user from database
+    # Assuming you have a User model
+    user = User.query.get(id)
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'msg': 'User deleted successfully'}), 200
+    return jsonify({'msg': 'User not found'}), 404

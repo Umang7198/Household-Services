@@ -308,8 +308,9 @@ export default {
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Search</a></li>
+          <li class="nav-item">
+              <router-link to="/search" class="nav-link">Search</router-link>
+          </li>
           <li class="nav-item"><a class="nav-link" href="#">Summary</a></li>
           <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="logout" style="cursor: pointer;">Logout</a> 
