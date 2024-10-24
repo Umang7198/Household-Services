@@ -992,3 +992,32 @@ def get_services():
     services = Service.query.all()
     service_list = [{'id': service.id, 'name': service.name} for service in services]
     return jsonify(service_list), 200
+
+
+@app.route('/search/professional-services', methods=['GET'])
+def search_professional_services():
+    professional_id = request.args.get('professional_id')
+    query = request.args.get('query')
+    
+    if not professional_id:
+        return jsonify({'msg': 'Professional ID required'}), 400
+
+    # Query to search services related to the professional
+    services = ServiceRequest.query.join(User, User.id == ServiceRequest.customer_id).filter(
+    ServiceRequest.professional_id == professional_id,
+    User.name.ilike(f'%{query}%')  # Search by customer name
+    ).all()
+
+
+    results = []
+    for service_request in services:
+        result = {
+            'id': service_request.id,
+            'service_name': service_request.service.name,
+            'customer_name': service_request.customer.name,
+            'date_of_request': service_request.date_of_request,
+            'service_status': service_request.service_status,
+            'rating': service_request.rating,
+        }
+        results.append(result)
+    return jsonify(results), 200
