@@ -925,3 +925,70 @@ def search_services():
         })
 
     return jsonify(service_list), 200
+
+@app.route('/professional/<int:professional_id>', methods=['PUT'])
+def update_professional(professional_id):
+    data = request.get_json()
+    print(data)
+    # Fetch the professional by ID (assuming User is used for both customer and professional roles)
+    professional = User.query.get(professional_id)
+    if not professional:
+        return jsonify({'error': 'Professional not found'}), 404
+
+    # Update professional details
+    professional.name = data.get('name', professional.name)
+    professional.email = data.get('email', professional.email)
+    professional.mobile = data.get('mobile', professional.mobile)
+    professional.address = data.get('address', professional.address)
+    professional.pin = data.get('pin', professional.pin)
+    professional.experience = data.get('experience', professional.experience)
+
+    # Update services (if provided)
+    service_id = data.get('service_id')
+    if service_id:
+        single_service = Service.query.get(service_id)
+        if single_service:
+            professional.professional_services = [single_service]
+
+    # Commit the updated professional information
+    try:
+        db.session.commit()
+
+        # After commit, calculate workload (number of ongoing requests) and average rating
+        workload = ServiceRequest.query.filter_by(professional_id=professional_id, service_status='in-progress').count()
+        avg_rating = db.session.query(db.func.avg(ServiceRequest.rating)).filter_by(professional_id=professional_id).scalar()
+
+        # Update workload and rating
+        professional.workload = workload
+        professional.rating = avg_rating if avg_rating else 0.0  # Default to 0 if no ratings
+
+        db.session.commit()  # Commit the workload and rating update
+
+        # Prepare response data
+        response_data = {
+            'id': professional.id,
+            'name': professional.name,
+            'email': professional.email,
+            'mobile': professional.mobile,
+            'address': professional.address,
+            'pin': professional.pin,
+            'experience': professional.experience,
+            'rating': professional.rating,
+            'workload': professional.workload,
+            'services': [{'id': service.id, 'name': service.name} for service in professional.professional_services],  
+            'date_created': professional.date_created
+  
+        }
+        return jsonify(response_data), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/services/edit', methods=['GET'])
+def get_services():
+    print('called')
+    services = Service.query.all()
+    service_list = [{'id': service.id, 'name': service.name} for service in services]
+    return jsonify(service_list), 200
