@@ -1021,3 +1021,60 @@ def search_professional_services():
         }
         results.append(result)
     return jsonify(results), 200
+
+
+@app.route('/admin/summary/service-requests', methods=['GET'])
+def get_service_request_summary():
+    total_requests = ServiceRequest.query.count()
+    completed_requests = ServiceRequest.query.filter_by(service_status='closed').count()
+    pending_requests_1 = ServiceRequest.query.filter_by(service_status='accepted').count()
+    pending_requests_2=ServiceRequest.query.filter_by(service_status='requested').count()
+    total_pending=pending_requests_1+pending_requests_2
+    failed_requests = ServiceRequest.query.filter_by(service_status='rejected').count()
+    return jsonify({
+        'total_requests': total_requests,
+        'completed_requests': completed_requests,
+        'pending_requests': total_pending,
+        'failed_requests': failed_requests
+    }), 200
+
+
+
+@app.route('/admin/summary/professionals', methods=['GET'])
+def get_professional_summary():
+    # Total number of professionals (users with role 'professional')
+    total_professionals = User.query.filter_by(role='professional').count()
+
+    # Average rating of all service requests
+    average_rating = db.session.query(func.avg(ServiceRequest.rating)).filter(ServiceRequest.rating != None).scalar() or 0
+
+    # Top 5 rated professionals (based on User's rating)
+    top_rated_professionals = User.query.filter_by(role='professional').order_by(User.rating.desc()).limit(5).all()
+
+    # Workload distribution: get the workload (ongoing services) for each professional from the User model
+    professionals_workload = User.query.filter_by(role='professional').with_entities(User.id, User.workload).all()
+
+    # Construct top-rated professionals data
+    top_rated_data = [{'id': p.id, 'name': p.name, 'rating': p.rating} for p in top_rated_professionals]
+
+    # Construct workload distribution data
+    workload_data = [{'professional_id': w[0], 'workload': w[1]} for w in professionals_workload]
+
+    return jsonify({
+        'total_professionals': total_professionals,
+        'average_rating': average_rating,
+        'top_rated_professionals': top_rated_data,
+        'workload_distribution': workload_data
+    }), 200
+
+@app.route('/admin/summary/users', methods=['GET'])
+def get_user_summary():
+    total_users = User.query.count()
+    
+    role_counts = db.session.query(User.role, db.func.count()).group_by(User.role).all()
+
+    return jsonify({
+        'total_users': total_users,
+        
+        'role_counts': [{'role': r[0], 'count': r[1]} for r in role_counts]
+    }), 200

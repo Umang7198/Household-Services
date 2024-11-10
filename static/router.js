@@ -17,7 +17,7 @@ import CustomerProfile from "./components/CustomerProfile.js";
 import AdminSearch from "./components/AdminSearch.js";
 import CustomerSearch from "./components/CustomerSearch.js";
 import ProfessionalSearch from "./components/ProfessionalSearch.js";
-
+import AdminSummary from "./components/AdminSummary.js";
 export default new VueRouter({
     mode: 'history',
     routes: [
@@ -38,5 +38,6 @@ export default new VueRouter({
       { path: '/admin/search', component: AdminSearch},
       { path: '/customer/search', component: CustomerSearch},
       { path: '/professinoal/search', component: ProfessionalSearch},
+      { path: '/admin/summary', component: AdminSummary},
     ],
 });

@@ -311,7 +311,9 @@ export default {
           <li class="nav-item">
               <router-link to="/admin/search" class="nav-link">Search</router-link>
           </li>
-          <li class="nav-item"><a class="nav-link" href="#">Summary</a></li>
+          <li class="nav-item">
+              <router-link to="/admin/summary" class="nav-link">Summary</router-link>
+          </li>
           <li class="nav-item">
             <a class="nav-link" href="#" @click.prevent="logout" style="cursor: pointer;">Logout</a> 
           </li>
