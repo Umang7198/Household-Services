@@ -41,7 +41,27 @@ export default {
             } catch (error) {
                 console.error("Error fetching user stats:", error);
             }
-        }
+        },
+        async logout() {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'GET',
+                });
+        
+                const result = await response.json();
+        
+                if (response.ok) {
+                    console.log('Logged out successfully:', result);
+                    this.$router.push('/login/admin');  // Redirect to the login page
+                } else {
+                    console.error('Failed to logout:', result.msg);
+                    this.handleError(result.msg || 'Failed to logout');
+                }
+            } catch (error) {
+                console.error('An error occurred while logging out:', error);
+                this.handleError('An error occurred while logging out');
+            }
+        },
     },
     mounted() {
         this.fetchServiceStats();
@@ -51,7 +71,26 @@ export default {
     template: `
         <div class="container mt-5">
             <h2 class="text-center mb-4">Admin Summary Page</h2>
-
+             <!-- Navigation Bar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 shadow-sm">
+                <a class="navbar-brand" href="#">Admin Panel</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <router-link to="/admin/dashboard" class="nav-link">Home</router-link>
+                        </li>
+                        <li class="nav-item">
+                            <router-link to="/admin/search" class="nav-link">Search</router-link>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @click.prevent="logout" style="cursor: pointer;">Logout</a> 
+                        </li>
+                    </ul>
+                </div>
+            </nav>
             <!-- Service Request Summary -->
             <div class="card mb-3">
                 <h3 class="card-header">Service Request Statistics</h3>
@@ -78,7 +117,8 @@ export default {
                     <p>Workload Distribution:</p>
                     <ul>
                         <li v-for="workload in sortedWorkloadDistribution" :key="workload.professional_id">
-                            Professional ID: {{ workload.professional_id }}, Jobs: {{ workload.workload }}
+                            Professional ID: {{ workload.professional_id }},Jobs: {{ workload.workload }},
+                              Name:{{ workload.professional_Name}}, 
                         </li>
                     </ul>
                 </div>

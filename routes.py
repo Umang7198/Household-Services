@@ -1052,13 +1052,13 @@ def get_professional_summary():
     top_rated_professionals = User.query.filter_by(role='professional').order_by(User.rating.desc()).limit(5).all()
 
     # Workload distribution: get the workload (ongoing services) for each professional from the User model
-    professionals_workload = User.query.filter_by(role='professional').with_entities(User.id, User.workload).all()
+    professionals_workload = User.query.filter_by(role='professional').with_entities(User.id, User.name,User.workload).all()
 
     # Construct top-rated professionals data
     top_rated_data = [{'id': p.id, 'name': p.name, 'rating': p.rating} for p in top_rated_professionals]
 
     # Construct workload distribution data
-    workload_data = [{'professional_id': w[0], 'workload': w[1]} for w in professionals_workload]
+    workload_data = [{'professional_id': w[0], 'professional_Name':w[1],'workload': w[2]} for w in professionals_workload]
 
     return jsonify({
         'total_professionals': total_professionals,
