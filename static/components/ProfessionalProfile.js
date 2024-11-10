@@ -102,7 +102,6 @@ export default {
       fetch(`/professional/${professionalId}`)
         .then(response => response.json())
         .then(data => {
-          console.log(data)
           this.professional = data;
           this.editProfessional = {
             ...data,

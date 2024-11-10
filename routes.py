@@ -1078,3 +1078,37 @@ def get_user_summary():
         
         'role_counts': [{'role': r[0], 'count': r[1]} for r in role_counts]
     }), 200
+
+
+@app.route('/professionals/summary/<int:professional_id>', methods=['GET'])
+def professional_summary(professional_id):
+    # Fetch the professional by ID
+    professional = User.query.filter_by(id=professional_id, role='professional').first()
+    if not professional:
+        return jsonify({'error': 'Professional not found'}), 404
+
+    # KPI calculations
+    total_requests = ServiceRequest.query.filter_by(professional_id=professional_id).count()
+    completed_requests = ServiceRequest.query.filter_by(professional_id=professional_id, service_status='closed').count()
+    pending_requests_1 = ServiceRequest.query.filter_by(professional_id=professional_id, service_status='requested').count()
+    pending_requests_2 = ServiceRequest.query.filter_by(professional_id=professional_id, service_status='accepted').count()
+    total_earnings = db.session.query(db.func.sum(ServiceRequest.price)).filter_by(professional_id=professional_id, service_status='closed').scalar() or 0.0
+    average_rating = db.session.query(db.func.avg(ServiceRequest.rating)).filter(ServiceRequest.professional_id == professional_id, ServiceRequest.rating != None).scalar() or 0.0
+    
+    # Latest reviews
+    latest_reviews = ServiceRequest.query.filter_by(professional_id=professional_id).order_by(ServiceRequest.date_of_completion.desc()).limit(5).all()
+    reviews_data = [{'id': review.id, 'rating': review.rating, 'review': review.review} for review in latest_reviews if review.rating is not None]
+
+    # Response structure
+    response_data = {
+        'professional': {
+            'name': professional.name,
+            'total_requests': total_requests,
+            'completed_requests': completed_requests,
+            'pending_requests': pending_requests_1+pending_requests_2,
+            'total_earnings': float(total_earnings),
+            'rating': float(average_rating),
+            'latest_reviews': reviews_data
+        }
+    }
+    return jsonify(response_data), 200
