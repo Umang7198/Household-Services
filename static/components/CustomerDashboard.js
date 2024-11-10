@@ -17,7 +17,7 @@ export default {
                                 <router-link class="nav-link" to="/customer/search">Search</router-link>
                             </li>
                             <li class="nav-item">
-                                <router-link class="nav-link" to="/summary">Summary</router-link>
+                                <router-link class="nav-link" to="/customer/summary">Summary</router-link>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#" @click.prevent="logout">Logout</a>
@@ -204,7 +204,6 @@ export default {
             fetch(`/service-history?customer_id=${customer_id}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data)
                     this.serviceHistory = data;  // Set the service history data
                 })
                 .catch(error => {

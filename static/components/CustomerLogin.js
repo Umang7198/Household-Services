@@ -51,7 +51,6 @@ export default {
                 });
 
                 const result = await response.json();
-                console.log(result)
                 if (result.status === 'success') {
                     const user = result.user;  // Assuming the user info is returned as 'user'
                     // console.log(user)

@@ -1112,3 +1112,53 @@ def professional_summary(professional_id):
         }
     }
     return jsonify(response_data), 200
+
+@app.route('/customer/summary/<int:user_id>', methods=['GET'])
+def user_summary(user_id):
+    user = User.query.filter_by(id=user_id, role='customer').first()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    # KPI calculations
+    total_requests = ServiceRequest.query.filter_by(customer_id=user_id).count()
+    completed_requests = ServiceRequest.query.filter_by(customer_id=user_id, service_status='closed').count()
+    total_spent = db.session.query(db.func.sum(ServiceRequest.price)).filter_by(customer_id=user_id, service_status='closed').scalar() or 0.0
+    average_rating_given = db.session.query(db.func.avg(ServiceRequest.rating)).filter(ServiceRequest.customer_id == user_id, ServiceRequest.rating != None).scalar() or 0.0
+
+    # Favorite services - based on the number of requests for each service
+    favorite_services_query = (
+        db.session.query(Service.id, Service.name, db.func.count(ServiceRequest.id).label('count'))
+        .join(ServiceRequest, ServiceRequest.service_id == Service.id)
+        .filter(ServiceRequest.customer_id == user_id)
+        .group_by(Service.id)
+        .order_by(db.desc('count'))
+        .limit(3)
+        .all()
+    )
+    favorite_services = [{'id': service.id, 'name': service.name} for service in favorite_services_query]
+
+    # Recent reviews given by the user
+    recent_reviews = (
+        ServiceRequest.query
+        .filter_by(customer_id=user_id)
+        .filter(ServiceRequest.rating != None)
+        .order_by(ServiceRequest.date_of_completion.desc())
+        .limit(5)
+        .all()
+    )
+    reviews_data = [{'id': review.id, 'rating': review.rating, 'review': review.review} for review in recent_reviews]
+
+    # Response structure
+    response_data = {
+        'user': {
+            'name': user.name,
+            'total_requests': total_requests,
+            'completed_requests': completed_requests,
+            'total_spent': float(total_spent),
+            'average_rating_given': float(average_rating_given),
+            'favorite_services': favorite_services,
+            'recent_reviews': reviews_data
+        }
+    }
+
+    return jsonify(response_data), 200
