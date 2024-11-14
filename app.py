@@ -4,9 +4,9 @@ from config import app, db
 from flask_migrate import Migrate
 from flask_cors import CORS
 import routes
-migrate = Migrate(app, db)
-# CORS(app)
-
+from celery import Celery
+from extensions import celery_app
+import tasks
 # Function to add predefined admin data
 def add_admin():
     # Predefined admin data
@@ -45,6 +45,34 @@ def add_admin():
         db.session.rollback()
         print(f"Error adding admin: {e}")
 
+# celery = celery_init_app(app)
+
+
+app.config.from_mapping(
+    CELERY=dict(
+        broker_url="redis://localhost:6379/1",
+        result_backend="redis://localhost:6379/2",
+        enable_utc=False,
+        timezone="Asia/Kolkata",
+        broker_connection_retry_on_startup=True
+    ),
+)
+
+# celery_app = Celery(app.name)
+celery_app.conf.update(app.config["CELERY"])
+
+class ContextTask(celery_app.Task):
+    def _call_(self, *args, **kwargs):
+        with app.app_context():
+            return self.run(*args, **kwargs)
+
+
+
+celery_app.Task = ContextTask
+celery_app.autodiscover_tasks(['tasks'])
+
+
+
 # Main block
 if __name__ == '__main__':
     with app.app_context():
@@ -53,4 +81,7 @@ if __name__ == '__main__':
         # Add admin data to the database
         add_admin()
     # Run the Flask app
+
     app.run(debug=True)
+
+

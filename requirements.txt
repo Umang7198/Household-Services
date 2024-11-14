@@ -9,3 +9,5 @@ Redis
 Celery
 Werkzeug
 PyJWT
+celery
+redis
