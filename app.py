@@ -1,5 +1,5 @@
 import os
-from models import User, Service, ServiceRequest  # Adjust the import path according to your project structure
+from models import *  # Adjust the import path according to your project structure
 from config import app, db
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -7,6 +7,8 @@ import routes
 from celery import Celery
 from extensions import celery_app
 import tasks
+from celery.schedules import crontab
+
 # Function to add predefined admin data
 def add_admin():
     # Predefined admin data
@@ -71,6 +73,12 @@ class ContextTask(celery_app.Task):
 celery_app.Task = ContextTask
 celery_app.autodiscover_tasks(['tasks'])
 
+celery_app.conf.beat_schedule = {
+    "send-daily-reminder-emails": {
+        "task": "tasks.daily_reminder_emails",
+        "schedule": crontab(hour=15, minute=29), 
+    },
+}
 
 
 # Main block
