@@ -16,7 +16,7 @@ db = SQLAlchemy(app)
 # config.py
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'uchaudhary2022002@gmail.com'
-EMAIL_HOST_PASSWORD = 'mgis xock ufhu evrh'
+EMAIL_HOST_USER = '21f3001035@ds.study.iitm.ac.in'
+EMAIL_HOST_PASSWORD = 'mvxf aksn iijx cnyz'
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL='uchaudhary2022002@gmail.com'
+DEFAULT_FROM_EMAIL='21f3001035@ds.study.iitm.ac.in'

@@ -64,7 +64,7 @@ class ServiceRequest(db.Model):
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     professional_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Assigned professional
-    date_of_request = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    date_of_request = db.Column(db.DateTime, default=datetime.now, nullable=False)
     date_of_completion = db.Column(db.DateTime, nullable=True)
     service_status = db.Column(db.String(50), nullable=False, default='requested')
     price = db.Column(db.Float, nullable=False)

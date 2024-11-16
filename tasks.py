@@ -2,7 +2,7 @@
 from extensions import celery_app  # Import celery_app from celeryconfig
 from models import *
 from datetime import datetime, timedelta
-from send_notification import send_email_notification  # Assuming you have a send_email function for sending emails
+from email_utils import send_email_notification,get_monthly_activity_data, generate_monthly_report 
 
 @celery_app.task
 def daily_reminder_emails():
@@ -28,3 +28,25 @@ def daily_reminder_emails():
                 send_email_notification(subject, message, recipient_email)
 
     return "Reminder emails sent to professionals."
+
+
+@celery_app.task
+def send_monthly_report():
+    from app import app  # Import your Flask app to access app context
+    
+    # Ensure we're inside the Flask app context
+    with app.app_context():
+        customers = User.query.filter_by(role='customer').all()
+        
+        for customer in customers:
+            # Get activity data specific to the customer
+            activity_data = get_monthly_activity_data(customer.id)
+
+            # Generate the HTML report
+            report_html = generate_monthly_report(activity_data)
+
+            # Send the report to the customer
+            subject = f"Your Monthly Activity Report - {activity_data['month']}"
+            send_email_notification(subject, report_html, customer.email)
+
+    return "Monthly activity report sent to customers."
