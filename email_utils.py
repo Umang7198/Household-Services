@@ -68,6 +68,8 @@ def get_monthly_activity_data(customer_id):
 
 def generate_monthly_report(data):
     # Format the message as a plain-text string
+    avg_rating = round(data['avg_rating'], 2) if data['avg_rating'] is not None else 'No ratings yet'
+
     text_report = f"""
     Monthly Activity Report - {data['month']}
 
@@ -78,7 +80,7 @@ def generate_monthly_report(data):
     - Total Services Requested: {data['requested_services']}
     - Total Services Completed: {data['closed_services']}
     - Average Rating for Closed Services: 
-    {data.get('avg_rating', 'N/A')}/5
+     {avg_rating}/5
 
     Thank you for using our service!
 

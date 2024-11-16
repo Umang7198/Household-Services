@@ -80,7 +80,7 @@ celery_app.conf.beat_schedule = {
     },
     "send-monthly-report": {
         "task": "tasks.send_monthly_report",
-        "schedule": crontab( hour=10, minute=40),  # Runs at midnight on the 1st day of every month
+        "schedule": crontab( hour=0, minute=0,day_of_month=1),  # Runs at midnight on the 1st day of every month
     },
 }
 
