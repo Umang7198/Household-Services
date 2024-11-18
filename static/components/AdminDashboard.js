@@ -293,6 +293,34 @@ export default {
         }
       }
     },
+     triggerExport() {
+      const adminEmail = prompt("Enter your email address to receive the export link:");
+      if (!adminEmail) {
+          alert("Email is required to proceed.");
+          return;
+      }
+  
+      fetch('/export-closed-requests', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: adminEmail }),
+      })
+          .then(response => response.json())
+          .then(data => {
+              if (data.error) {
+                  alert(`Error: ${data.error}`);
+              } else {
+                  alert("Export job initiated. You will receive an email once it's complete.");
+              }
+          })
+          .catch(err => {
+              alert("Failed to initiate export job.");
+              console.error(err);
+          });
+  }
+  
     
   },
   template: `
@@ -318,6 +346,7 @@ export default {
             <a class="nav-link" href="#" @click.prevent="logout" style="cursor: pointer;">Logout</a> 
           </li>
         </ul>
+        
       </div>
     </nav>
 
@@ -466,6 +495,10 @@ export default {
         </tbody>
       </table>
     </section>
+    <section id="export-section" class="mb-5">
+    <h3 class="text-muted">Export Closed Service Requests</h3>
+    <button id="export-csv" class="btn btn-primary" @click="triggerExport()">Export as CSV</button>
+  </section>
 
     <!-- Success and Error Messages -->
     <div v-if="successMessage" class="alert alert-success mt-4">{{ successMessage }}</div>

@@ -1162,3 +1162,16 @@ def user_summary(user_id):
     }
 
     return jsonify(response_data), 200
+
+from tasks import export_closed_service_requests
+
+
+@app.route('/export-closed-requests', methods=['POST'])
+def export_closed_requests():
+    admin_email = request.json.get('email')
+    if not admin_email:
+        return jsonify({"error": "Admin email is required"}), 400
+
+    # Trigger Celery task
+    export_closed_service_requests.delay(admin_email)
+    return jsonify({"message": "Export job initiated. You will be notified once it's complete."}), 200

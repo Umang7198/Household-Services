@@ -48,6 +48,8 @@ def add_admin():
         print(f"Error adding admin: {e}")
 
 # celery = celery_init_app(app)
+EXPORT_FOLDER = app.config.get('EXPORT_FOLDER', os.path.join(os.getcwd(), 'exports'))
+app.config['EXPORT_FOLDER'] = EXPORT_FOLDER
 
 
 app.config.from_mapping(

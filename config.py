@@ -14,6 +14,9 @@ db = SQLAlchemy(app)
 
 
 # config.py
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+EXPORT_FOLDER = os.path.join(BASE_DIR, 'exports')
+
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = '21f3001035@ds.study.iitm.ac.in'
