@@ -111,8 +111,9 @@ export default {
                     <p>Top Rated Professionals:</p>
                     <ul>
                         <li v-for="professional in professionalStats.top_rated_professionals" :key="professional.id">
-                            {{ professional.name }} - Rating: {{ professional.rating }}
+                            {{ professional.name }} - Rating: {{ professional.rating != null ? professional.rating.toFixed(2) : 'N/A' }}
                         </li>
+
                     </ul>
                     <p>Workload Distribution:</p>
                     <ul>

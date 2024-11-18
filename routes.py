@@ -4,6 +4,7 @@ from config import app,db
 from flask import Flask, request, redirect, render_template, url_for, session,abort,flash,jsonify
 from datetime import datetime,date
 from sqlalchemy import func
+from tasks import export_closed_service_requests
 
 @app.route('/')
 def index():
@@ -108,20 +109,31 @@ def get_service_categories():
 @app.route('/services', methods=['GET'])
 def get_services_by_category():
     category_id = request.args.get('category')
-    if category_id:
-        services = Service.query.filter_by(category_id=category_id).all()
-    else:
-        services = Service.query.all()
+    if not category_id:
+        return jsonify({"error": "Category ID is required"}), 400
 
+    # Fetch category by ID
+    category = ServiceCategory.query.get(category_id)
+    if not category:
+        return jsonify({"error": "Category not found"}), 404
+
+    # Fetch services under the category
+    services = Service.query.filter_by(category_id=category_id).all()
+
+    # Prepare the response
     services_list = [{
         "id": service.id,
         "name": service.name,
         "base_price": service.base_price,
-        "time_required":service.time_required,
-        "categoryName": service.category.name  # Assuming Service has a relationship with Category
+        "time_required": service.time_required,
+        "categoryName": category.name  # Use the category name
     } for service in services]
 
-    return jsonify(services_list)
+    return jsonify({
+        "categoryName": category.name,
+        "services": services_list
+    })
+
 
 
 
@@ -148,12 +160,15 @@ def update_service(service_id):
 @app.route('/service/<int:service_id>', methods=['DELETE'])
 def delete_service(service_id):
     service = Service.query.get(service_id)
+    print(service)
     if not service:
         return jsonify({'msg': 'Service not found', 'status': 'error'}), 404
 
     try:
         db.session.delete(service)
         db.session.commit()
+        print(12)
+
         return jsonify({'msg': 'Service deleted successfully', 'status': 'success'})
     except Exception as e:
         db.session.rollback()
@@ -1163,7 +1178,6 @@ def user_summary(user_id):
 
     return jsonify(response_data), 200
 
-from tasks import export_closed_service_requests
 
 
 @app.route('/export-closed-requests', methods=['POST'])

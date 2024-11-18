@@ -1,18 +1,17 @@
 # tasks.py
 from extensions import celery_app  # Import celery_app from celeryconfig
 from models import *
+from flask_mail import Message
+
 from datetime import datetime, timedelta
 from email_utils import send_email_notification,get_monthly_activity_data, generate_monthly_report 
 import csv
 import os
 @celery_app.task
 def daily_reminder_emails():
-    from app import app  # Import app to use its context
+    from app import app  
 
-    with app.app_context():  # Ensure we have Flask application context
-        # Set inactivity threshold (e.g., professionals inactive for 7 days)
-
-        # Query professionals with pending service requests or who have been inactive
+    with app.app_context():  
         professionals = User.query.filter_by(role='professional').all()
         for professional in professionals:
             # Check for pending requests
@@ -35,7 +34,6 @@ def daily_reminder_emails():
 def send_monthly_report():
     from app import app  # Import your Flask app to access app context
     
-    # Ensure we're inside the Flask app context
     with app.app_context():
         customers = User.query.filter_by(role='customer').all()
         
@@ -55,11 +53,10 @@ def send_monthly_report():
 
 @celery_app.task
 def export_closed_service_requests(admin_email):
-    from app import app  # Import the Flask app
-
+    from app import app  # Import Flask app
+    from config import EXPORT_FOLDER
     with app.app_context():  # Wrap the task in the application context
         # Define file name and path
-        from config import EXPORT_FOLDER  # Import EXPORT_FOLDER directly from config
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         file_name = f"closed_service_requests_{timestamp}.csv"
         file_path = os.path.join(EXPORT_FOLDER, file_name)
@@ -91,9 +88,11 @@ def export_closed_service_requests(admin_email):
                     request.review or "No remarks"
                 ])
         
-        # Notify the admin
+        # Send the email with the CSV file as an attachment
         subject = "Closed Service Requests Export Complete"
-        message = f"Your requested CSV file is ready. You can download it from the following location: {file_path}"
-        send_email_notification(subject, message, admin_email)
+        message = f"Your requested CSV file is ready. Please find it attached."
+        
+        # Assuming send_email_notification supports attachments
+        send_email_notification(subject, message, admin_email, attachment=file_path)
 
-    return f"Export completed and saved to {file_path}"
+    return f"Export completed and file sent to {admin_email}"

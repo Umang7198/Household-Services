@@ -58,10 +58,10 @@ export default {
         if (response.ok) {
           this.services = await response.json();  // Populate services
         } else {
-          this.error = 'Failed to fetch services';
+            pass
         }
       } catch (err) { 
-        this.error = 'An error occurred while fetching services';
+        pass
       }
     },
     

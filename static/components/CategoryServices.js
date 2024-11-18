@@ -92,27 +92,30 @@ export default {
         goToAdminDashboard() {
             this.$router.push('/admin/dashboard');
           },
-      fetchServices() {
-        const categoryId = this.$route.params.categoryId;  // Assuming you pass the category ID in the route
-  
-        // Fetch services from the backend using the category query parameter
-        fetch(`/services?category=${categoryId}`)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json();
-          })
-          .then(data => {
-            this.services = data;  // Services are directly the response
-            // Set categoryName from the first service if available
-            this.categoryName = this.services.length > 0 ? this.services[0].categoryName : 'Unknown Category';
-          })
-          .catch(error => {
-            console.error('Error fetching services:', error);
-            this.errorMessage = 'Failed to load services';
-          });
-      },
+          fetchServices() {
+            const categoryId = this.$route.params.categoryId;  // Get category ID from the route
+    
+            fetch(`/services?category=${categoryId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch services');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        this.errorMessage = data.error;
+                        this.categoryName = "Unknown Category";  // Fallback if category not found
+                    } else {
+                        this.categoryName = data.categoryName;  // Set category name
+                        this.services = data.services;  // Set services list
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching services:', error);
+                    this.errorMessage = 'Failed to load services';
+                });
+        },
       showAddServiceForm() {
         this.selectedService = { description: ''};
         this.showServiceForm = true;
@@ -160,6 +163,7 @@ export default {
         fetch(`/service/${serviceId}`, { method: 'DELETE' })
           .then(response => {
             if (!response.ok) {
+              
               throw new Error('Failed to delete service');
             }
             return response.json();
@@ -167,6 +171,7 @@ export default {
           .then(data => {
             this.successMessage = data.msg;
             this.fetchServices(); // Reload the services
+            console.log("done")
           })
           .catch(error => {
             console.error('Error deleting service:', error);

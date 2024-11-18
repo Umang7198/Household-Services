@@ -11,3 +11,4 @@ Werkzeug
 PyJWT
 celery
 redis
+Flask-Mail

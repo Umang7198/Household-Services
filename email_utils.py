@@ -2,29 +2,57 @@
 from smtplib import SMTP
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+import os
 from config import EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, DEFAULT_FROM_EMAIL
 from datetime import datetime, timedelta
 from models import *
+from email import encoders
+import smtplib
 
-def send_email_notification(subject, message, to_email):
-    msg = MIMEText(message, 'plain')  # Send as plain text only
-    msg['From'] = DEFAULT_FROM_EMAIL
+
+def send_email_notification(subject, message, to_email, attachment=None):
+    from email.utils import formataddr
+    
+    # Email setup
+    # Create the email
+    msg = MIMEMultipart()
+    msg['From'] = formataddr(('Umang Chaudhary', EMAIL_HOST_USER))
     msg['To'] = to_email
-    msg['Subject'] = subject.strip()
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, 'plain'))
 
+    # Attach the file if provided
+    if attachment:
+        try:
+            # Open the file in binary mode
+            with open(attachment, 'rb') as file:
+                # Create the attachment part
+                part = MIMEBase('application', 'octet-stream')
+                part.set_payload(file.read())
+                encoders.encode_base64(part)
+                part.add_header('Content-Disposition', f"attachment; filename={os.path.basename(attachment)}")
+                
+                # Attach the part to the message
+                msg.attach(part)
+        except Exception as e:
+            print(f"Failed to attach file: {e}")
+
+    # Sending the email
     try:
-        with SMTP(EMAIL_HOST, EMAIL_PORT) as server:
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:  # Replace with your SMTP server details
             server.starttls()
             server.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
-            server.sendmail(DEFAULT_FROM_EMAIL, to_email, msg.as_string())
-        print(f"Email sent to {to_email}")
+            server.sendmail(EMAIL_HOST_USER, to_email, msg.as_string())
+            print(f"Email sent to {to_email}")
     except Exception as e:
-        print(f"Failed to send email to {to_email}: {e}")
+        print(f"Error sending email: {e}")
+
 
 
 def get_monthly_activity_data(customer_id):
     # Get the date range for the last month
-    today = datetime.utcnow()
+    today = datetime.now()
     first_day_of_this_month = today.replace(day=1)
     last_day_of_last_month = first_day_of_this_month - timedelta(days=1)
     first_day_of_last_month = last_day_of_last_month.replace(day=1)

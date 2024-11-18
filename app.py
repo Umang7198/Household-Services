@@ -78,7 +78,7 @@ celery_app.autodiscover_tasks(['tasks'])
 celery_app.conf.beat_schedule = {
     "send-daily-reminder-emails": {
         "task": "tasks.daily_reminder_emails",
-        "schedule": crontab(hour=15, minute=29), 
+        "schedule": crontab(hour=19, minute=20), 
     },
     "send-monthly-report": {
         "task": "tasks.send_monthly_report",
