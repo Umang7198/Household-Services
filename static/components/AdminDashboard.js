@@ -26,7 +26,7 @@ export default {
     };
   },
   created() {
-    this.fetchServices();  // Call the fetchServices method
+    // this.fetchServices();  // Call the fetchServices method
     this.fetchProfessionals();  // Fetch professionals awaiting approval
     this.fetchServiceRequests();
     this.fetchCategories();  // Fetch categories

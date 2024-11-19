@@ -1,14 +1,22 @@
 from models import db, User,Service,ServiceRequest,ServiceCategory,professional_services
 from werkzeug.security import check_password_hash, generate_password_hash
 from config import app,db
-from flask import Flask, request, redirect, render_template, url_for, session,abort,flash,jsonify
+from flask import Flask, request, redirect, send_from_directory,render_template, url_for, session,abort,flash,jsonify
 from datetime import datetime,date
 from sqlalchemy import func
 from tasks import export_closed_service_requests
+from tasks import send_email_notification
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/<path:path>', methods=['GET'])
+def catch_all(path):
+    # Serve index.html for any undefined route
+    return render_template('index.html')
+
+
 
 @app.route('/logout', methods=['GET'])
 def logout():
@@ -282,6 +290,14 @@ def approve_professional(professional_id):
     try:
         professional.verified = True
         db.session.commit()
+
+        # Send email notification to the professional about approval
+        subject = "Your Professional Account Has Been Approved"
+        message = f"Dear {professional.name},\n\nYour account has been approved successfully. You are now a verified professional on our platform.\n\nThank you for joining us!\n\nBest regards,\nServiceX Team"
+        
+        # Send the email to the professional
+        send_email_notification(subject, message, professional.email)
+
         return jsonify({'msg': 'Professional approved successfully', 'status': 'success'}), 200
     except Exception as e:
         db.session.rollback()
@@ -297,6 +313,13 @@ def reject_professional(professional_id):
     try:
         db.session.delete(professional)
         db.session.commit()
+
+        subject = "Your Professional Account Has Been Rejected"
+        message = f"Dear {professional.name},\n\nWe regret to inform you that your application to join our platform as a professional has been rejected.\n\nWe appreciate your interest, and we encourage you to apply again in the future if you'd like.\n\nBest regards,\nServiceX Team"
+        
+        # Send the email to the professional
+        send_email_notification(subject, message, professional.email)
+
         return jsonify({'msg': 'Professional rejected and deleted successfully', 'status': 'success'}), 200
     except Exception as e:
         db.session.rollback()
@@ -1003,7 +1026,7 @@ def update_professional(professional_id):
 
 @app.route('/services/edit', methods=['GET'])
 def get_services():
-    print('called')
+    
     services = Service.query.all()
     service_list = [{'id': service.id, 'name': service.name} for service in services]
     return jsonify(service_list), 200

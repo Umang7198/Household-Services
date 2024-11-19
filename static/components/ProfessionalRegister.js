@@ -88,7 +88,7 @@ export default {
   methods: {
     async fetchServices() {
       try {
-        const response = await fetch('/services');    
+        const response = await fetch('/services/edit');    
         if (response.ok) {
           this.services = await response.json();
         } else {

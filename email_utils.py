@@ -9,10 +9,10 @@ from datetime import datetime, timedelta
 from models import *
 from email import encoders
 import smtplib
+from email.utils import formataddr
 
 
 def send_email_notification(subject, message, to_email, attachment=None):
-    from email.utils import formataddr
     
     # Email setup
     # Create the email
