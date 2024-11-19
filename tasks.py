@@ -1,7 +1,6 @@
 # tasks.py
 from extensions import celery_app  # Import celery_app from celeryconfig
 from models import *
-from flask_mail import Message
 
 from datetime import datetime, timedelta
 from email_utils import send_email_notification,get_monthly_activity_data, generate_monthly_report 
