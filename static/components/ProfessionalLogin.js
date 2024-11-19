@@ -19,7 +19,9 @@ export default {
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
-                                <input type="password" v-model="password" id="password" class="form-control" placeholder="Enter Password" required>
+                                <input type="password" v-model="password" id="password" 
+                                minlength="8"
+                                class="form-control" placeholder="Enter Password" required>
                             </div>
                             <div class="d-flex justify-content-between mt-4">
                                 <button type="submit" class="btn btn-primary w-50">Login</button>

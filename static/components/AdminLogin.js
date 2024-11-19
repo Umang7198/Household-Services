@@ -19,7 +19,9 @@ export default {
                                 </div>
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
-                                    <input type="password" v-model="password" id="password" class="form-control" placeholder="Enter Password" required>
+                                    <input type="password" v-model="password" id="password" 
+                                    minlength="8"
+                                    class="form-control" placeholder="Enter Password" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100">Login</button>
                                 <p v-if="error" class="text-danger mt-3 text-center">{{ error }}</p>

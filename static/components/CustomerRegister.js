@@ -23,7 +23,9 @@ export default {
                                 </div>
                                 <div class="mb-3">
                                     <label for="mobile" class="form-label">Mobile</label>
-                                    <input type="text" v-model="mobile" id="mobile" class="form-control" placeholder="Enter your mobile number" required>
+                                    <input type="text" v-model="mobile" id="mobile" class="form-control" placeholder="Enter your mobile number" 
+                                    minlength="10"
+                                    required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="username" class="form-label">Username</label>
@@ -31,7 +33,9 @@ export default {
                                 </div>
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
-                                    <input type="password" v-model="password" id="password" class="form-control" placeholder="Enter your password" required>
+                                    <input type="password" v-model="password" id="password" 
+                                    minlength="8"
+                                    class="form-control" placeholder="Enter your password" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="address" class="form-label">Address</label>

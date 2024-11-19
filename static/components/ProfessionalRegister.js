@@ -22,7 +22,9 @@ export default {
                 </div>
                 <div class="mb-3">
                   <label for="mobile" class="form-label">Mobile</label>
-                  <input type="text" v-model="mobile" id="mobile" class="form-control" placeholder="Enter Mobile Number" required>
+                  <input type="text" v-model="mobile" id="mobile" class="form-control"
+                  minlength="10"
+                  placeholder="Enter Mobile Number" required>
                 </div>
                 <div class="mb-3">
                   <label for="username" class="form-label">Username</label>
@@ -30,7 +32,9 @@ export default {
                 </div>
                 <div class="mb-3">
                   <label for="password" class="form-label">Password</label>
-                  <input type="password" v-model="password" id="password" class="form-control" placeholder="Enter Password" required>
+                  <input type="password" v-model="password" id="password"
+                  minlength="8"
+                  class="form-control" placeholder="Enter Password" required>
                 </div>
                 <div class="mb-3">
                   <label for="service" class="form-label">Service Name</label>

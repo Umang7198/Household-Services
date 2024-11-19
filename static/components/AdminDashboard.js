@@ -26,7 +26,7 @@ export default {
     };
   },
   created() {
-    // this.fetchServices();  // Call the fetchServices method
+    this.fetchServices();  // Call the fetchServices method
     this.fetchProfessionals();  // Fetch professionals awaiting approval
     this.fetchServiceRequests();
     this.fetchCategories();  // Fetch categories
@@ -54,7 +54,7 @@ export default {
     },
     async fetchServices() {
       try {
-        const response = await fetch('/services');  // Replace with your actual API URL
+        const response = await fetch('/services/edit');  // Replace with your actual API URL
         if (response.ok) {
           this.services = await response.json();  // Populate services
         } else {
