@@ -17,7 +17,7 @@ export default {
                                 <router-link class="nav-link" to="/professinoal/search">Search</router-link>
                             </li>
                             <li class="nav-item">
-                                <router-link class="nav-link" to="/professionl/summary">Summary</router-link>
+                                <router-link class="nav-link" to="/professional/summary">Summary</router-link>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#" @click.prevent="logout">Logout</a>

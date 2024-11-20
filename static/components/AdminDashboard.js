@@ -2,19 +2,10 @@ export default {
   name: 'AdminDashboard',
   data() {
     return {
-      services: [],
       professionals: [],  // Professionals awaiting approval
       serviceRequests: [],
       categories: [],  // Initialize categories
-      selectedCategory: null,  // Initialize selected category
-      editMode: false,  // To toggle edit mode for services
-      serviceToEdit: {
-        id: null,
-        name: '',
-        base_price: '',
-        description: '',
-        time_required: ''
-      },
+      
       newCategory: {
         name: '',
         description: ''
@@ -26,7 +17,6 @@ export default {
     };
   },
   created() {
-    this.fetchServices();  // Call the fetchServices method
     this.fetchProfessionals();  // Fetch professionals awaiting approval
     this.fetchServiceRequests();
     this.fetchCategories();  // Fetch categories
@@ -52,18 +42,7 @@ export default {
         this.error = 'An error occurred while logging out';
       }
     },
-    async fetchServices() {
-      try {
-        const response = await fetch('/services/edit');  // Replace with your actual API URL
-        if (response.ok) {
-          this.services = await response.json();  // Populate services
-        } else {
-            pass
-        }
-      } catch (err) { 
-        pass
-      }
-    },
+    
     
     
     async fetchProfessionals() {
@@ -176,65 +155,11 @@ export default {
       this.successMessage = '';
       this.error = '';
     },
-    editService(service) {
-      // Enable edit mode and populate the form with the service details
-      this.serviceToEdit = { ...service };
-      this.editMode = true;
-    },
+   
     navigateToServices(categoryId) {
       this.$router.push(`/services/${categoryId}`);
     },
-    async updateService() {
-      try {
-        const response = await fetch(`/service/${this.serviceToEdit.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: this.serviceToEdit.name,
-            base_price: this.serviceToEdit.base_price,
-            description: this.serviceToEdit.description,
-            time_required: this.serviceToEdit.time_required,
-          }),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          this.successMessage = result.msg;
-          this.editMode = false;
-          this.fetchServices(); // Refresh services after successful update
-        } else {
-          this.error = result.msg || 'Failed to update';
-        }
-      } catch (error) {
-        this.error = 'An error occurred while updating the service';
-      }
-    },
-    cancelEdit() {
-      this.editMode = false;
-      this.serviceToEdit = {}; // Clear the serviceToEdit
-    },
-    async deleteService(serviceId) {
-      if (confirm('Are you sure you want to delete this service?')) {
-        try {
-          const response = await fetch(`/service/${serviceId}`, {
-            method: 'DELETE',
-          });
-          const result = await response.json();
-
-          if (response.ok) {
-            this.successMessage = result.msg;
-            this.services = this.services.filter(service => service.id !== serviceId); // Remove the deleted service from the local state
-          } else {
-            this.error = result.msg || 'Failed to delete the service';
-          }
-        } catch (error) {
-          this.error = 'An error occurred while deleting the service';
-        }
-      }
-    },
+    
     async fetchProfessionalDetails(id) {
       try {
         const response = await fetch(`/professional/${id}`);
@@ -406,28 +331,6 @@ export default {
   </div>
 </div>
 
-
-
-    <!-- Services for Selected Category -->
-    <section v-if="selectedCategory" class="mb-5">
-      <h3 class="text-muted">Services for {{ selectedCategory.name }}</h3>
-      <table class="table table-hover shadow-sm rounded">
-        <thead class="thead-dark">
-          <tr>
-            <th>ID</th>
-            <th>Service Name</th>
-            <th>Base Price (₹)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="service in categoryServices" :key="service.id">
-            <td>{{ service.id }}</td>
-            <td>{{ service.name }}</td>
-            <td>{{ service.base_price }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
 
     <!-- Professionals Awaiting Approval -->
     <section class="mb-5">

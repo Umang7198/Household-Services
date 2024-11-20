@@ -171,7 +171,6 @@ export default {
           .then(data => {
             this.successMessage = data.msg;
             this.fetchServices(); // Reload the services
-            console.log("done")
           })
           .catch(error => {
             console.error('Error deleting service:', error);

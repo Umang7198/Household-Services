@@ -60,9 +60,7 @@ export default {
                 </div>
             </div>
             
-            <div v-else>
-                <p>Loading customer details...</p>
-            </div>
+            
 
             <button @click="goToDashboard" class="btn btn-primary mt-4">Back to Dashboard</button>
 

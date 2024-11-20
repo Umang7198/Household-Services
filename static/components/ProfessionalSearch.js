@@ -17,7 +17,6 @@ export default {
 
                 if (response.ok) {
                     this.searchResults = result;  // Store search results
-                    console.log(result);
                 } else {
                     this.error = result.msg || 'Failed to fetch search results';
                 }

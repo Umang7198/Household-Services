@@ -57,7 +57,7 @@ export default {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="service in categoryServices" :key="service.id">
+                            <tr v-for="service in categoryServices.services" :key="service.id">
                                 <td>{{ service.name }}</td>
                                 <td>{{ service.base_price }}</td>
                                 <td>
@@ -115,9 +115,11 @@ export default {
             serviceHistory: [],
         };
     },
-    mounted() {
+    created() {
         // Fetch service categories from the backend
-        fetch('/service-categories')
+        fetch('/service-categories',{
+            method:'GET'
+        })
             .then(response => response.json())
             .then(data => {
                 this.categories = data;
@@ -183,7 +185,6 @@ export default {
                         id: service.id,
                         name: service.name,
                         professional: data.professional,  // Name of the professional from the backend
-                        phone: '1234567890',  // Placeholder for professional's phone (fetch the actual value from the backend if available)
                         status: 'requested'
                     });
                     

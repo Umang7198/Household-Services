@@ -25,7 +25,7 @@ export default {
                             </div>
                             <div class="d-flex justify-content-between mt-4">
                                 <button type="submit" class="btn btn-primary w-50">Login</button>
-                                <router-link to="/register/professionl" class="btn btn-outline-secondary w-50 ms-3">Register</router-link>
+                                <router-link to="/register/professional" class="btn btn-outline-secondary w-50 ms-3">Register</router-link>
                             </div>
                             <p v-if="error" class="text-danger mt-3 text-center">{{ error }}</p>
                         </form>

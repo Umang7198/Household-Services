@@ -39,7 +39,7 @@ export default {
                 <div class="mb-3">
                   <label for="service" class="form-label">Service Name</label>
                   <select v-model="service_id" id="service" class="form-select" required>
-                      <option value="" disabled selected>Select a Service</option> <!-- Placeholder option -->
+                      <option value="" >Select a Service</option> <!-- Placeholder option -->
                       <option v-for="service in services" :value="service.id" :key="service.id">
                         {{ service.name }}
                       </option>
@@ -118,7 +118,7 @@ export default {
             description: this.description,
             address: this.address,
             pin: this.pin,
-            role: 'professional'  // Role set to 'professional'
+              // Role set to 'professional'
           })
         });
 

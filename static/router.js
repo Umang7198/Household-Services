@@ -6,7 +6,6 @@ import AdminLogin from "./components/AdminLogin.js";
 import CustomerRegister from "./components/CustomerRegister.js";
 import ProfessionalRegister from "./components/ProfessionalRegister.js";
 import AdminDashboard from "./components/AdminDashboard.js";
-import AddService from "./components/AddService.js";
 import CustomerDashboard from "./components/CustomerDashboard.js";
 import CategoryServices from './components/CategoryServices.js'; 
 import ProfessionalDashboard from "./components/ProfessionalDashboard.js";
@@ -29,9 +28,8 @@ export default new VueRouter({
       { path: '/login/professional', component: ProfessionalLogin },
       { path: '/login/admin', component: AdminLogin },  // Add route for AdminLogin
       { path: '/register/customer', component: CustomerRegister},
-      { path: '/register/professionl', component: ProfessionalRegister},
+      { path: '/register/professional', component: ProfessionalRegister},
       { path: '/admin/dashboard', component: AdminDashboard},
-      { path: '/add-service', component: AddService },
       { path: '/customer/dashboard', component: CustomerDashboard},
       { path: '/services/:categoryId', component: CategoryServices },
       { path: '/professional/dashboard', component: ProfessionalDashboard},
@@ -42,7 +40,7 @@ export default new VueRouter({
       { path: '/customer/search', component: CustomerSearch},
       { path: '/professinoal/search', component: ProfessionalSearch},
       { path: '/admin/summary', component: AdminSummary},
-      { path: '/professionl/summary', component: ProfessionalSummary},
+      { path: '/professional/summary', component: ProfessionalSummary},
       { path: '/customer/summary', component: CustomerSummary},
     ],
 });

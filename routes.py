@@ -774,7 +774,6 @@ def get_customer(customer_id):
 
     return jsonify(customer_data), 200
 
-# Flask backend routes (example)
 
 # Combined route to search for customers or professionals based on role
 @app.route('/search/users', methods=['GET'])
