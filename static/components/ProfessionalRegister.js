@@ -31,11 +31,21 @@ export default {
                   <input type="text" v-model="username" id="username" class="form-control" placeholder="Enter Username" required>
                 </div>
                 <div class="mb-3">
-                  <label for="password" class="form-label">Password</label>
-                  <input type="password" v-model="password" id="password"
-                  minlength="8"
-                  class="form-control" placeholder="Enter Password" required>
-                </div>
+                        <label for="password" class="form-label">Password</label>
+                        <input 
+                            type="password" 
+                            v-model="password" 
+                            id="password" 
+                            class="form-control" 
+                            placeholder="Enter your password" 
+                            required 
+                            @input="validatePassword"
+                        >
+                        <small class="text-muted">
+                            Password must contain at least 8 characters, including uppercase, lowercase, number, and a special character.
+                        </small>
+                        <p v-if="passwordError" class="text-danger mt-1">{{ passwordError }}</p>
+                  </div>
                 <div class="mb-3">
                   <label for="service" class="form-label">Service Name</label>
                   <select v-model="service_id" id="service" class="form-select" required>
@@ -84,6 +94,8 @@ export default {
       error: '',
       services: [],
       service_id: '',
+      passwordError: '' // For password validation feedback
+
     };
   },
   created() {
@@ -132,6 +144,24 @@ export default {
       } catch (err) {
         this.error = 'An error occurred';
       }
-    }
+    },
+    validatePassword() {
+      const hasLength = this.password.length >= 8;
+      const hasLetter = /[A-Za-z]/.test(this.password);
+      const hasDigit = /\d/.test(this.password);
+      const hasSpecialChar = /[@$!%*?&]/.test(this.password);
+  
+      if (!hasLength) {
+          this.passwordError = 'Password must be at least 8 characters long.';
+      } else if (!hasLetter) {
+          this.passwordError = 'Password must contain at least one letter.';
+      } else if (!hasDigit) {
+          this.passwordError = 'Password must contain at least one number.';
+      } else if (!hasSpecialChar) {
+          this.passwordError = 'Password must contain at least one special character.';
+      } else {
+          this.passwordError = '';
+      }
+  }
   }
 };

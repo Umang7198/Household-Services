@@ -33,10 +33,21 @@ export default {
                                 </div>
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
-                                    <input type="password" v-model="password" id="password" 
-                                    minlength="8"
-                                    class="form-control" placeholder="Enter your password" required>
+                                    <input 
+                                        type="password" 
+                                        v-model="password" 
+                                        id="password" 
+                                        class="form-control" 
+                                        placeholder="Enter your password" 
+                                        required 
+                                        @input="validatePassword"
+                                    >
+                                    <small class="text-muted">
+                                        Password must contain at least 8 characters, including uppercase, lowercase, number, and a special character.
+                                    </small>
+                                    <p v-if="passwordError" class="text-danger mt-1">{{ passwordError }}</p>
                                 </div>
+
                                 <div class="mb-3">
                                     <label for="address" class="form-label">Address</label>
                                     <input type="text" v-model="address" id="address" class="form-control" placeholder="Enter your address" required>
@@ -63,7 +74,9 @@ export default {
             password: '',
             address: '',
             pin: '',
-            error: ''
+            error: '',
+            passwordError: '' // For password validation feedback
+
         };
     },
     methods: {
@@ -85,6 +98,8 @@ export default {
                 });
 
                 if (response.ok) {
+                    alert('Registration successful!');
+
                     this.$router.push('/login/customer');
                 } else {
                     const data = await response.json();
@@ -93,6 +108,25 @@ export default {
             } catch (err) {
                 this.error = 'An error occurred';
             }
+        },
+        validatePassword() {
+            const hasLength = this.password.length >= 8;
+            const hasLetter = /[A-Za-z]/.test(this.password);
+            const hasDigit = /\d/.test(this.password);
+            const hasSpecialChar = /[@$!%*?&]/.test(this.password);
+        
+            if (!hasLength) {
+                this.passwordError = 'Password must be at least 8 characters long.';
+            } else if (!hasLetter) {
+                this.passwordError = 'Password must contain at least one letter.';
+            } else if (!hasDigit) {
+                this.passwordError = 'Password must contain at least one number.';
+            } else if (!hasSpecialChar) {
+                this.passwordError = 'Password must contain at least one special character.';
+            } else {
+                this.passwordError = '';
+            }
         }
+        
     }
 };
