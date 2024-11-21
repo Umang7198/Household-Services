@@ -460,11 +460,7 @@ def find_best_professional(service_id, customer_pin):
         User.pin == customer_pin
     ).order_by(User.rating.desc(), User.workload.asc()).first()
 
-    # # Debug step: Check if a professional was found
-    # if best_professional:
-    #     print(f"Best professional found in same pin: {best_professional.name}")
-    # else:
-    #     print("No professional found in same pin code")
+    
 
     # Step 2: If no professional is found in the same pin code, expand the search
     if not best_professional:
@@ -474,11 +470,7 @@ def find_best_professional(service_id, customer_pin):
             User.verified == True
         ).order_by(User.rating.desc(), User.workload.asc()).first()
 
-        # Debug step: Check if a professional was found in nearby pins
-        # if best_professional:
-        #     print(f"Best professional found in other pins: {best_professional.name}")
-        # else:
-        #     print("No professional found in other pins either")
+        
     
     return best_professional
 

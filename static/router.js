@@ -11,7 +11,6 @@ import CategoryServices from './components/CategoryServices.js';
 import ProfessionalDashboard from "./components/ProfessionalDashboard.js";
 import ServiceRating from "./components/ServiceRating.js";
 import ProfessionalProfile from "./components/ProfessionalProfile.js";
-
 import CustomerProfile from "./components/CustomerProfile.js";
 import AdminSearch from "./components/AdminSearch.js";
 import CustomerSearch from "./components/CustomerSearch.js";

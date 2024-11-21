@@ -39,29 +39,28 @@ with app.app_context():
 
     # Add Users (Professionals and Customers)
     users = [
-        User(name="John Doe", email="john@electric.com", mobile="1234567890", username="john", password="john", role="professional",experience="4", address="123 Main St", pin="123456",rating="4.5",workload="2", verified=True),
-        User(name="Sarah Lee", email="sarah@cleanhome.com", mobile="9876543210", username="sarah_clean", password="hashed_password", role="professional", experience="4",address="456 Elm St", pin="654321", verified=True,rating="4",workload="6",),
-        User(name="Alice Smith", email="alice@domain.com", mobile="1122334455", username="alice", password="alice", role="customer", address="789 Maple Ave", pin="987654", verified=False),
-        User(name="Bob Brown", email="bob@domain.com", mobile="2233445566", username="bob", password="bob", role="customer", address="123 Pine St", pin="654321", verified=False)
+        User(name="John Doe", email="john@electric.com", mobile="1234567890", username="john", password="John@123", role="professional",experience="4", address="123 Main St", pin="123456",rating="4.5",workload="2", verified=True),
+        User(name="Sarah Lee", email="sarah@cleanhome.com", mobile="9876543210", username="sarah_clean", password="Sarah@123", role="professional", experience="4",address="456 Elm St", pin="654321", verified=True,rating="4",workload="6",),
+        User(name="Alice Smith", email="alice@domain.com", mobile="1122334455", username="alice", password="Alice@123", role="customer", address="789 Maple Ave", pin="987654", verified=False),
+        User(name="Bob Brown", email="bob@domain.com", mobile="2233445566", username="bob", password="Bob@1234", role="customer", address="123 Pine St", pin="654321", verified=False)
     ]
     db.session.add_all(users)
     db.session.commit()
 
-    # Add Service Requests
     # service_requests = [
-    #     ServiceRequest(service_id=1, customer_id=3, professional_id=1, service_status="completed", price=120.00, remarks="Excellent service", date_of_completion=datetime.now()),
-    #     ServiceRequest(service_id=4, customer_id=4, professional_id=2, service_status="in progress", price=50.00),
-    #     ServiceRequest(service_id=5, customer_id=3, professional_id=1, service_status="requested", price=50.00)
-    # ]
+    # ServiceRequest(service_id=1,customer_id=4,professional_id=6,date_of_request=datetime(2024, 10, 16, 6, 5, 4, 727310),date_of_completion=None,service_status="rejected",price=100.0,rating=None,review=None
+    # ),
+    # ServiceRequest(service_id=2,customer_id=4,professional_id=6,date_of_request=datetime(2024, 10, 16, 6, 5, 44, 610241),date_of_completion=datetime(2024, 10, 16, 11, 36, 36, 67791),service_status="closed",price=100.0,rating=5.0,review="fiib"
+    # ),
+    # ServiceRequest(service_id=3,customer_id=4,professional_id=6,date_of_request=datetime(2024, 10, 16, 11, 49, 17, 356537),date_of_completion=datetime(2024, 10, 16, 11, 50, 10, 789473),service_status="closed",price=120.0,rating=3.0,review="mvmdv"
+    # ),
+    # ServiceRequest(service_id=4,customer_id=4,professional_id=6,date_of_request=datetime(2024, 10, 16, 11, 51, 42, 90252),date_of_completion=None,service_status="rejected",price=120.0,rating=None,review=None
+    # ),
+    # ServiceRequest(service_id=7,customer_id=4,professional_id=7,date_of_request=datetime(2024, 10, 20, 10, 9, 59, 383033),date_of_completion=datetime(2024, 10, 20, 10, 10, 47, 918003),service_status="closed",price=80.0,rating=3.0,review="can be better"
+    # )
+# ]
     # db.session.add_all(service_requests)
     # db.session.commit()
 
-    # Add Ratings
-    # ratings = [
-    #     Rating(service_request_id=1, rating=5, review="Great service, very professional."),
-    #     Rating(service_request_id=2, rating=4, review="Good service but slightly delayed.")
-    # ]
-    # db.session.add_all(ratings)
-    # db.session.commit()
 
 print("Dummy data added successfully!")
