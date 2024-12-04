@@ -20,6 +20,6 @@ EXPORT_FOLDER = os.path.join(BASE_DIR, 'exports')
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = '21f3001035@ds.study.iitm.ac.in'
-EMAIL_HOST_PASSWORD = 'mvxf aksn iijx cnyz'
+EMAIL_HOST_PASSWORD = '**************'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL='21f3001035@ds.study.iitm.ac.in'
